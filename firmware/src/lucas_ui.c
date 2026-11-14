@@ -147,7 +147,7 @@ UI_SMALL static int lf_ui_input(uint32_t pressed)
         else {
             uint32_t focus=(uint32_t)clamp((lf_page==LF_HOME && lf_home_loops?4:(int32_t)song.sel)+s,0,lf_page==LF_HOME?4:3);
             lf_home_loops=(uint8_t)(focus==4);
-            if(focus<4 && focus!=song.sel) {lf_release(1u<<song.sel);track_select(focus);}
+            if(focus<4 && focus!=song.sel) {lf_fx_patch=255;lf_release(1u<<song.sel);track_select(focus);}
         }
     }
     if((s=panel_enc(EN_ALGO))) {
@@ -265,7 +265,7 @@ UI_SMALL static void lf_values(const char **lab,char val[4][16])
     } else if(lf_page==LF_SAVE) {
         lab[0]="SLOT";lab[1]=lab[2]=lab[3]="";fmt_int(val[0],song.g[G_SLOT]);val[1][0]=val[2][0]=val[3][0]=0;
     } else {
-        fmt_int(val[0],(is_drum(TSEL)?song.g[G_DRLVL]:TSEL->p[P_LEVEL])*100/127);fmt_int(val[1],TSEL->p[P_TFLT]);
+        fmt_int(val[0],(is_drum(TSEL)?song.g[G_DRLVL]:TSEL->p[P_LEVEL])*100/127);{const char *unit;param_format(track_desc(TSEL,P_TFLT),TSEL->p[P_TFLT],val[1],&unit);}
         fmt_int(val[2],(is_drum(TSEL)?song.g[G_DRREV]:TSEL->p[P_REV])*100/127);str_cpy(val[3],modes[lf_mode()],16);
         if(lf_page==LF_MIX) {lab[1]="PAN";lab[2]="MUTE";lab[3]="SOLO";fmt_int(val[1],TSEL->p[P_PAN]);str_cpy(val[2],TSEL->p[P_MUTE]?"ON":"OFF",16);str_cpy(val[3],song.solo&(1u<<song.sel)?"ON":"OFF",16);}
     }
@@ -318,6 +318,8 @@ UI_SMALL static int lf_ui_draw(void)
                 lf_text(6,19,N_NOTE[trk[0].p[P_ROOT]%12],LF_TEXT);lf_text(30,19,N_SCALE[trk[0].p[P_SCALE]%NSCALES],LF_DIM);
                 lf_num(85,19,song.g[G_BPM],LF_TEXT);lf_text(113,19,"BPM",LF_DIM);
                 lf_text(144,19,lf_home_loops?"EDIT: LOOPS":"EDIT: SOUND",LF_DIM);
+            } else if(lf_page==LF_LOOPS) {
+                lf_text(6,19,"PRE BANK",LF_DIM);lf_num(77,19,lf_pick/4+1,c);lf_text(96,19,"ALGO MATCH",LF_DIM);
             } else {
                 lf_num(6,19,song.sel+1,c);lf_text(20,19,LF_ROLE[song.sel],c);
                 lf_text(88,19,lf_page==LF_EFFECTS?"ALGO: EFFECT":lf_page==LF_LFO?"ALGO: WAVE":lf_page==LF_ARP?"ALGO: PATTERN":lf_page==LF_LOOPS?"ALGO: MATCH":lf_page==LF_SAVE?"SELECT: ACTION":"SELECT: PART",LF_DIM);
@@ -374,13 +376,20 @@ UI_SMALL static int lf_ui_draw(void)
                     lf_text(120-text_w(&FONT_S,quality)/2,87,quality,LF_DIM);}
                 {int width=0,x;for(k=0;k<nn;k++)width+=text_w(&FONT_S,N_NOTE[ns[k]%12])+8;x=120-width/2;
                     for(k=0;k<nn;k++){lf_text(x,107,N_NOTE[ns[k]%12],LF_TEXT);x+=text_w(&FONT_S,N_NOTE[ns[k]%12])+8;}}
-                lf_text(166,0,TSEL->p[P_AHOLD]?"HELD":"FREE",LF_DIM);lf_text(4,145,"EDIT: HOLD",LF_DIM);cv_oy=0;
+                lf_text(166,0,TSEL->p[P_AHOLD]?"HELD":"FREE",LF_DIM);lf_text(4,0,"EDIT:HOLD",LF_DIM);cv_oy=0;
             } else {
                 if(row==1)lf_text(8,4,is_drum(TSEL)?"DRUM KEYS":"GUIDED PIANO",LF_DIM);
                 if(row==2)cv_text(82,0,&FONT_L,name,LF_COLOR[song.sel]);
                 if(row==3)lf_text(8,5,"ALL NOTES PLAYABLE",LF_DIM);
-                if(row==4)for(k=0;k<27;k++) {uint32_t note=53+k;uint16_t c=(scale_mask(TSEL)>>((note-TSEL->p[P_ROOT]+120)%12))&1u?LF_COLOR[0]:LF_DIM;
-                    cv_rect(4+k*8,4,6,30,c);}
+                if(row==4) {
+                    uint32_t pass,w;
+                    for(pass=0;pass<2;pass++)for(k=0,w=0;k<27;k++) {
+                        uint32_t note=53+k,white=(0xAB5u>>(note%12))&1u;
+                        uint16_t c=(scale_mask(TSEL)>>((note-TSEL->p[P_ROOT]+120)%12))&1u?LF_COLOR[song.sel]:LF_DIM;
+                        if(white) {if(!pass)cv_rect(6+w*14,4,13,30,c);w++;}
+                        else if(pass)cv_rect(2+w*14,4,8,18,c==LF_DIM?LF_BG:LF_SURFACE);
+                    }
+                }
             }
         } else if(lf_page==LF_SOUND) {
             const engine_t *engine=ENGINES[TSEL->eng_req%NENGINES];
@@ -404,7 +413,7 @@ UI_SMALL static int lf_ui_draw(void)
             {static const char *const match[]={"FREE","KEY","BPM","K+B"};lf_text(100,20,match[lf[LF_FLAGS+id]&3],LF_DIM);}
             if(id==lf_pick)lf_text(141,20,"EDIT",LF_COLOR[0]);lf_num(195,20,lf[LF_LEVEL+id]*100/127,LF_DIM);
         } else if(lf_page==LF_EFFECTS) {
-            if(row==1) cv_text(8,7,text_w(&FONT_L,LF_EFFECT[lf_effect])<224?&FONT_L:&FONT_S,LF_EFFECT[lf_effect],LF_COLOR[song.sel]);
+            if(row==1) cv_text(8,7,text_w(&FONT_L,LF_EFFECT[lf_effect])<=224?&FONT_L:&FONT_S,LF_EFFECT[lf_effect],LF_COLOR[song.sel]);
             if(row==2) {lf_text(8,0,lf_effect==0?"SELECTED TRACK":lf_effect>=5?"SEND / SHARED BUS":"SHARED MASTER",LF_DIM);
                 lf_text(8,20,lf_fx_amount()?"ACTIVE":"BYPASSED",lf_fx_amount()?LF_COLOR[1]:LF_DIM);}
             if(row==3 && lf_effect!=3 && lf_effect!=4) {

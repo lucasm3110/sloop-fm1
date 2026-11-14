@@ -85,7 +85,11 @@ static void controls(void) {
     tap(B_SCL);assert(lf_page==LF_PLAY);v=song.g[G_BPM];turn(EN_K3,1);assert(song.g[G_BPM]==v+1);tap(B_EDIT);assert(!TSEL->p[P_AHOLD]);
     tap(B_FX);lf_effect=1;lf_fxpage=0;lf[LF_EQ]=0;turn(EN_K2,10);assert(lf[LF_EQ]);
     tap(B_EDIT);assert(!lf[LF_EQ]);tap(B_EDIT);assert(lf[LF_EQ]);
-    turn(EN_ALGO,3);assert(lf_effect==4);lf[LF_GMIX]=0;tap(B_EDIT);assert(lf[LF_GMIX]==80);
+    e=TSEL->eng_req;turn(EN_PRESET,1);assert(TSEL->eng_req==e && lf[LF_EQ]);
+    turn(EN_ALGO,1);turn(EN_PRESET,1);assert(lf[LF_DRIVE]>0 && TSEL->eng_req==e);
+    turn(EN_ALGO,3);turn(EN_PRESET,1);assert(TSEL->p[P_DLY]>0 && TSEL->eng_req==e);
+    turn(EN_ALGO,1);turn(EN_PRESET,1);assert(TSEL->p[P_REV]>0 && TSEL->eng_req==e);
+    turn(EN_ALGO,-2);assert(lf_effect==4);lf[LF_GMIX]=0;tap(B_EDIT);assert(lf[LF_GMIX]==80);
     tap(B_EDIT);assert(!lf[LF_GMIX]);tap(B_EDIT);assert(lf[LF_GMIX]==80);
     turn(EN_SELECT,3);assert(song.sel==3);tap(B_LFO);v=TSEL->p[P_LD_PIT];turn(EN_K2,10);assert(TSEL->p[P_LD_PIT]==v);
     tap(B_HOME);tap(B_EDIT);tap(B_EDIT);assert(lf_page==LF_ADV);tap(B_HOME);assert(lf_page==LF_HOME);
@@ -121,7 +125,7 @@ int main(int argc,char **argv) {
     tap(B_SCL);assert(lf_page==LF_PLAY);tap(B_HOME);assert(lf_page==LF_HOME);
     chords();if(argc>1){load_pack(argv[1]);loops();}effects();controls();audible_effects();persistence();
     if(argc>2) {outdir=argv[2];track_select(0);lf_defaults();ui.msg_t=0;
-        for(unsigned p=0;p<=LF_TONE;p++) {char name[24];lf_open(p);lf_ui_draw();snprintf(name,sizeof name,"lucas-%u",p);ppm(name);}
+        for(unsigned p=0;p<=LF_TONE;p++) {char name[24];lf_open(p);if(p==LF_PLAY)lf_mode_set(2);lf_ui_draw();snprintf(name,sizeof name,"lucas-%u",p);ppm(name);}
     }
     puts("PASS: all Lucas navigation and knob pages rendered within 240x240");return 0;
 }
