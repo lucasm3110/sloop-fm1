@@ -1,0 +1,43 @@
+{
+  "data_bss_bytes": 85484,
+  "data_bss_limit": 98304,
+  "pool_bytes": 333900,
+  "pool_limit": 344064,
+  "lowram_bytes": 22772,
+  "app_bytes": 579644,
+  "audio": {
+    "magic": 1145194289,
+    "halves": 882,
+    "max_us": 2869,
+    "nested": 21574,
+    "in_audio": 1,
+    "late": 1,
+    "timer_irqs": 51206,
+    "ui_frames": 129,
+    "last_us": 2224,
+    "cpu_q8": 91,
+    "boots": 1,
+    "stage": 2,
+    "page": 37,
+    "home": 0,
+    "prev_stage": 0,
+    "prev_page": 0,
+    "prev_home": 0,
+    "prev_rst": 0,
+    "prev_frames": 0,
+    "last_cpu_percent": 35.55,
+    "buffer_deadline_us": 5804,
+    "shed_count": 0,
+    "fx_guard": 0,
+    "pitched_voices": [
+      0,
+      0,
+      0
+    ],
+    "pcm_peak": 0
+  },
+  "mhz": 100,
+  "strict": true,
+  "script": "3000:HOME,3200:HOME^",
+  "firmware_sha256": "7b04f7627cc59b6f18ff76e627c25c0d7904e77313515b987609986226a158ee"
+}

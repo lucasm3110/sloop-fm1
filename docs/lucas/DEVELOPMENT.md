@@ -29,6 +29,9 @@ The native emulator source is `joakimeriksson/fm1-emu`, tested at `883e10f8b37d2
 
 ```sh
 python3 tools/lucas_emulator.py build/tested --runner ../fm1-emu/target/release/fm1-live --screens --stress
+python3 tools/lucas_maximum_check.py build/tested --runner ../fm1-emu/target/release/fm1-live --voices 7
+# --voices 8 probes the known overload boundary and is expected to fail the no-shedding assertion.
+python3 tools/lucas_upload_check.py build/tested --runner ../fm1-emu/target/release/fm1-live
 ```
 
 Screenshots are rendered by the actual firmware. Strict tests use `FM1_STRICT=1`, including timed LCD SPI, instruction costs, cache misses and alignment checks. The regular screenshot tests still use `FM1_LCD_TIMED=1`. **Do not restore a full flash image from an older package while testing a newer one:** the emulator restores its code sectors too. The harness generates fresh flash from the current package and overlays sample slots only. `FM1_BENCH_NOKEYS` suppresses scripted keys, so the harness removes it from scripted runs.

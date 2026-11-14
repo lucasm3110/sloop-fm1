@@ -4,9 +4,13 @@ A separate GPL-3.0 firmware fork of SLOOP for the M-VAVE FM-1. This repository i
 
 ## Start playing
 
+On this Mac, double-click `Launch Lucas FM.command` in the LucasFM folder. It opens the real native emulator with your local ten-sound collection and USR1 personal drum kit already installed. It does not connect to physical MIDI devices. `Open Lucas Editor.command` opens the companion editor in Chrome on localhost. Closing its Terminal window stops the local web server.
+
+For another computer, use the source/build instructions or open `dist/lucas-fm-0.1.fwsc` in the hosted emulator's **Open .fwsc…** control. Imported audio is separate: the public ZIP includes an emulator-only flash image and the transferable `.lucaspack`. Never send the emulator flash `.bin` through a physical firmware updater.
+
 The initial song is D major, 72 BPM, with Warm Pad, Sub Bass, Rhodes and drums. The first three tracks share eight pitched voices; the fourth uses SLOOP's separate drum engine. These are starting sounds: choose any retained synth engine/preset on tracks 1–3. Track 4 remains the dedicated drum track.
 
-Press ARP to open PLAY. Consecutive white keys walk the selected scale; physical C4 is degree 1, D4 is degree 2, and so on, with lower and higher octaves on either side. In D major the seven triads are D, Em, F# minor, G, A, Bm and C# diminished. The wheel shows the root, quality and chord tones. Black keys are silent in the everyday number/chord modes. The deeper SLOOP interface retains its optional chord modifiers.
+Press ARP to open PLAY. Consecutive white keys walk the selected scale; the fifth white key from the left (physical C4) is degree 1, the next is degree 2, and so on, with lower and higher octaves on either side. In D major the seven triads are D, Em, F# minor, G, A, Bm and C# diminished. The wheel shows the root, quality and chord tones. Black keys are silent in the everyday number/chord modes. The deeper SLOOP interface retains its optional chord modifiers.
 
 K4 chooses PIANO, NUM (single scale notes) or CHORD (diatonic triads). PIANO preserves chromatic playing, including out-of-scale notes; the screen and single-color key lights guide the scale. ARP again toggles chord hold. A new chord replaces the held chord; toggling hold off releases it. Changing track, key, mode or octave releases the affected live notes. Key changes affect live mapping and matching of prepared loops; they do not transpose recorded sequence notes.
 
@@ -92,7 +96,7 @@ Use the existing Song/Projects and device-backup functions for notes, settings a
 
 Modulation width changes the wet modulation phase spread, preserving the dry source's stereo image. At zero width the effect still works and identical left/right inputs remain identical. The stereo effect is not made by polarity inversion. Grain is an original four-grain processor with a short bounded buffer, triangular windows and bounded feedback. Scatter zero means no randomized pitch. **In Key only takes audio from exactly one active tonal loop with a declared root**; it does not analyze arbitrary recordings or correct every note in a polyphonic pad. Multiple tonal loops or an unknown root provide no new In Key grain input. Octaves/Free process the master mix. Delay/reverb reuse the existing shared buses and limiter. Reverb size and decay are coupled by the retained engine; they are not independent controls.
 
-Large effect changes are smoothed where relevant. The original overload voice shedding remains as last-resort protection; `LOAD` warns above roughly 85% audio CPU on non-Home pages. The 100 MHz emulator setting cannot sustain the maximum tested load. See VALIDATION.md for measurements at both 100 and the device's nominal 240 MHz.
+Large effect changes are smoothed where relevant. If two audio buffers exceed about 85% load, the new shared EQ, Drive, Modulation and Grain processors yield first. Their last contribution fades to dry over 64 samples, preserving held notes. A persistent `NEW FX PAUSED: CPU` message appears; press FX to retry after reducing the load. Existing delay/reverb buses and the limiter remain. After that first reduction, the last-resort threshold uses 92% of the audio deadline, including USB service time. If the retained engine alone still overloads, its last-resort voice shedding remains and the screen reports `VOICE LIMIT: CPU`. The 100 MHz emulator setting cannot sustain the maximum tested load. See VALIDATION.md for measurements at both 100 and the device's nominal 240 MHz.
 
 ## Connections and updates
 

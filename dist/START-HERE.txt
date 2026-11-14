@@ -1,0 +1,21 @@
+Lucas FM 0.1 for M-VAVE FM-1
+
+Actual firmware, validated in the native emulator. No physical device has been flashed.
+
+On the development Mac: double-click Launch Lucas FM.command in the LucasFM repository. Your personal collection and USR1 drum kit are already loaded there.
+
+Elsewhere: open lucas-fm-0.1.fwsc with Open .fwsc in https://joakimeriksson.github.io/fm1-emu/ . This loads the custom firmware, not stock SLOOP. Use 240 MHz for the documented full workload.
+
+Native emulator: fm1-live --fwsc lucas-fm-0.1.fwsc --flash emulator-only-starter.bin --midi none --mhz 240
+The .bin is an emulator-only snapshot, NOT a physical update file.
+
+The public starter .lucaspack contains ten short imported sounds (four concurrent). Load it through Samples / Lucas FM Imported loop collection in the existing editor. It replaces all four user sample slots. Personal audio is not included.
+
+GUIDE.md explains physical controls and preparation. VALIDATION.md lists exact measurements and limits. DEVELOPMENT.md explains reproducible builds. source-commit.txt and SHA256SUMS identify the exact tested firmware.
+
+Limits: independent pitch/tempo preparation is offline; full workload fails at 100 MHz; extreme loads pause shared effects and can reach the visible voice limit. See the measured supported workloads. Full upstream CI retains four static instruction-budget failures. Physical-device checks remain outstanding.
+
+Complete corresponding source and licenses:
+https://github.com/lucasm3110/sloop-fm1/tree/334dfb74c2e010879760981a1bec67f3da3b91b6
+Documentation and companion tools:
+https://github.com/lucasm3110/sloop-fm1/tree/codex/lucas-fm

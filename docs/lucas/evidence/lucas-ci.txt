@@ -1,0 +1,11 @@
+PASS: 12-root diatonic chords, chromatic mapping, held note release on root/mode changes
+PASS: ten resident imports, four-layer cap, texture pitch, key guard, queued rhythmic start, faded stop
+PASS: exact dry bypass, four modulation modes mono/wide, grain feedback/headroom bounded
+PASS: extension round trip, damaged checksum rejected; project 3816/3840 bytes
+PASS: all Lucas navigation and knob pages rendered within 240x240
+.s....
+----------------------------------------------------------------------
+Ran 6 tests in 0.001s
+
+OK (skipped=1)
+PASS: browser pack creation, ten entries, audible encoding, Python compatibility, corruption and root validation

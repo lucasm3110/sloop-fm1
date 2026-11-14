@@ -1,0 +1,11 @@
+{
+  "data_bss_bytes": 85484,
+  "data_bss_limit": 98304,
+  "pool_bytes": 333900,
+  "pool_limit": 344064,
+  "lowram_bytes": 22772,
+  "app_bytes": 579644,
+  "source_commit": "334dfb74c2e010879760981a1bec67f3da3b91b6",
+  "firmware_sha256": "7b04f7627cc59b6f18ff76e627c25c0d7904e77313515b987609986226a158ee",
+  "app_limit": 581564
+}
