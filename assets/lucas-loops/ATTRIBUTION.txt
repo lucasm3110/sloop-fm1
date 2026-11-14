@@ -1,0 +1,16 @@
+Lucas four-layer collection / D major / 72 BPM
+
+Eight tonal loops rendered with SLOOP/Felucca's ANALOG and DIGITAL sounds.
+Reproduce: compile tests/lucas_loop_render.c like tests/hostsim.c, run into
+build/loops04, then run tools/lucas_collection.py (ffmpeg required).
+Presets and source code credits: LICENSING.md. Generated performances CC0.
+
+Two rhythm loops are original arrangements of Versilian Studios VCSL CC0
+kick, snare and closed hi-hat recordings. See assets/samples-cc0/ATTRIBUTION.txt.
+Each is a finished audio loop; no drum sequencer runs in the instrument.
+Original arrangements are dedicated to CC0. Mono 16 kHz IMA ADPCM,
+one bar (3.333 seconds), normalized with 15 ms boundary tapers.
+
+The separately prepared personal version uses the user's local kit and remains
+in ignored private/ storage. No personal samples are part of this collection.
+This collection occupies all four user sample slots.

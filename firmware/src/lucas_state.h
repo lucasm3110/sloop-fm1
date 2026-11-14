@@ -4,6 +4,9 @@
 #ifndef LUCAS_FM
 #define LUCAS_FM 0
 #endif
+#ifndef LUCAS_LOOPS_ONLY
+#define LUCAS_LOOPS_ONLY LUCAS_FM
+#endif
 #if LUCAS_FM
 enum { LF_LOW, LF_BASS, LF_MID, LF_TREBLE, LF_HIGH, LF_EQ,
        LF_DRIVE, LF_DTONE, LF_OUTPUT, LF_MOD, LF_AMOUNT, LF_SPEED, LF_DEPTH, LF_WIDTH,
@@ -23,6 +26,12 @@ static void lf_defaults(void)
 {
     uint32_t i;
     memset(lf, 0, sizeof lf);
+#if LUCAS_LOOPS_ONLY
+    /* v2: four clip IDs, four levels, enabled mask; the old FX values are retired. */
+    lf[0]=0;lf[1]=3;lf[2]=5;lf[3]=8;
+    lf[4]=100;lf[5]=90;lf[6]=90;lf[7]=75;lf[8]=1;
+    return;
+#endif
     lf[LF_BASS]=lf[LF_MID]=lf[LF_TREBLE]=64;
     lf[LF_HIGH]=127; lf[LF_DTONE]=80; lf[LF_OUTPUT]=100;
     lf[LF_SPEED]=lf[LF_DEPTH]=lf[LF_DENSITY]=40;

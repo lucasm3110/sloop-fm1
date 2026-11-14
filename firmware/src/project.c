@@ -464,16 +464,21 @@ static const uint8_t LF_STORE[]={P_ATK,P_DEC,P_SUS,P_REL,P_ED_FLT,P_ED_PIT,P_ED_
 _Static_assert(LF_COUNT<=48,"Lucas extension fits drum synth fields");
 static void lf_project_put(project_t *p)
 {
-    uint32_t i;pt_set(&p->t[3],LF_STORE[0],0x4C31);
+    uint32_t i;pt_set(&p->t[3],LF_STORE[0],LUCAS_LOOPS_ONLY?0x4C32:0x4C31);
     for(i=0;i<24;i++) {uint32_t a=i*2,b=a+1;
         pt_set(&p->t[3],LF_STORE[i+1],(int16_t)((a<LF_COUNT?lf[a]:0)|((b<LF_COUNT?lf[b]:0)<<8)));}
 }
 static void lf_project_get(const project_t *p)
 {
     uint32_t i;lf_defaults();lf_loops_stop();lf_scan_gen=0xFFFFFFFFu;
-    if(pt_get(&p->t[3],LF_STORE[0])!=0x4C31) return;
+    if(pt_get(&p->t[3],LF_STORE[0])!=(LUCAS_LOOPS_ONLY?0x4C32:0x4C31)) return;
     for(i=0;i<LF_COUNT;i++) lf[i]=(uint8_t)clamp(((uint16_t)pt_get(&p->t[3],LF_STORE[i/2+1])>>(8*(i&1)))&255,0,127);
+#if LUCAS_LOOPS_ONLY
+    for(i=0;i<4;i++)if(lf[i]<lf_first[i] || lf[i]>=lf_first[i+1])lf[i]=lf_first[i];
+    lf[8]&=15;lf_running=0;
+#else
     lf[LF_EQ]=!!lf[LF_EQ];lf[LF_MOD]%=4;lf[LF_PITCH]%=3;
+#endif
     for(i=0;i<10;i++)lf[LF_FLAGS+i]&=3;
 }
 #endif

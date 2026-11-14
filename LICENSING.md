@@ -69,3 +69,7 @@ by those owners.
 ## Radio
 
 Felucca never enables the Bluetooth / Wi-Fi radio of the hardware.
+
+## Lucas loop interface font
+
+Nunito by Vernon Adams, Cyreal and Jacques Le Bailly, from Google Fonts, is used for the Lucas 0.4 interface. Licensed under SIL OFL 1.1; see assets/fonts/Nunito-LICENSE.txt. Original font: https://github.com/google/fonts/tree/main/ofl/nunito .

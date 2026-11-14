@@ -1178,6 +1178,9 @@ static void texture_mix(int32_t *l, int32_t *r, uint32_t n)
 #if LUCAS_FM
 #include "lucas_fx.c"
 #include "lucas_loops.c"
+#if LUCAS_LOOPS_ONLY
+#include "lucas_scene.c"
+#endif
 #endif
 
 static void mix_block(int32_t *out, uint32_t n)
@@ -1186,6 +1189,9 @@ static void mix_block(int32_t *out, uint32_t n)
     int32_t m0, m1, *mix_l = acc[0].l, *mix_r = acc[0].r;
     for (i = 0; i < n; i++)
         acc[0].l[i] = acc[0].r[i] = acc[0].sc[i] = acc[0].sd[i] = acc[0].sr[i] = 0;
+#if LUCAS_LOOPS_ONLY
+    lf_scene_mix(mix_l,mix_r,n);
+#else
     {   /* REV / ECHO THROW (2.6): the sends glide to full and back over ~12 ms (17 blocks); set before the hand-off:
          * the units on both cores read them (send_thr) */
         uint32_t q = thr_req | thr_ed;                  /* (2.7: the editor's LIVE page too) */
@@ -1237,6 +1243,7 @@ static void mix_block(int32_t *out, uint32_t n)
     dust_process(mix_l, mix_r, n);
     punch_process(mix_l, mix_r, n);
     djf_process(mix_l, mix_r, n);
+#endif
     m1 = (int32_t)song.master_q12;
     m0 = master_cur < 0 ? m1 : master_cur;
     master_cur = m1;

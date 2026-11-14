@@ -27,6 +27,8 @@ FONTS = Path(__file__).resolve().parents[1] / "assets" / "fonts"
 # capitals only (gfx.c glyph); the regular ter-u16n.bdf stays for the web editor's font (gen_webfont.py)
 SIZES = [("S", "ter-u16b.bdf", 16, 1, True, 32, 255),   # Latin-1 (Hügelton needs the umlaut)
          ("L", "ter-u16b.bdf", 16, 2, True, 32, 95)]   # values / titles: digits, signs, capitals
+SIZES += [("LS", "Nunito.ttf", 12, 1, False, 32, 126),
+          ("LL", "Nunito.ttf", 23, 1, False, 32, 126)]
 PAD = 2
 
 
@@ -105,7 +107,8 @@ def render(ttf, px, scale, pixel, first, last):
     if ttf.endswith(".bdf"):
         return render_bdf(FONTS / ttf, scale, first, last)
     font = ImageFont.truetype(str(FONTS / ttf), px)
-    feats = None if pixel else ["tnum"]
+    if ttf == "Nunito.ttf": font.set_variation_by_axes([700])
+    feats = None if pixel or ttf == "Nunito.ttf" else ["tnum"]
     asc, desc = font.getmetrics()
     top = max(0, font.getbbox("A8|(", features=feats)[1] - 1)
     h = asc + desc - top
