@@ -6,9 +6,11 @@ if [[ ! -x "$runner" ]]; then
   print "Build the sibling fm1-emu repository first: cargo build --release -p fm1-live"
   exit 1
 fi
-state="private/personal-d72.flash.bin"
-[[ -f "$state" ]] || state="build/validated/starter-flash.bin"
-if [[ -f "$state" ]]; then
-  exec "$runner" --fwsc dist/lucas-fm-0.1.fwsc --flash "$state" --midi none --mhz 240
+mkdir -p private
+package="dist/lucas-fm-0.2.fwsc"
+state="private/public-0.2-session.bin"
+if [[ -f "private/lucas-fm-0.2-personal.fwsc" ]]; then
+  package="private/lucas-fm-0.2-personal.fwsc"
+  state="private/personal-0.2-session.bin"
 fi
-exec "$runner" --fwsc dist/lucas-fm-0.1.fwsc --midi none --mhz 240
+exec "$runner" --fwsc "$package" --flash "$state" --midi none --mhz 240

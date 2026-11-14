@@ -24,7 +24,7 @@ jobs:
           for file in uboot.boot cfg_tool.bin cfg/eq_cfg_hw.bin; do
             dest="$HOME/fw-AC79_AIoT_SDK/cpu/wl82/tools/$file"
             mkdir -p "$(dirname "$dest")"
-            curl -fL --retry 3 "https://gitee.com/Jieli-Tech/fw-AC79_AIoT_SDK/raw/AC79NN_SDK_V1.2.1_2023-12-13/cpu/wl82/tools/$file" -o "$dest"
+            curl -fL --retry 3 --retry-all-errors --retry-delay 2 --connect-timeout 20 --max-time 90 "https://gitee.com/Jieli-Tech/fw-AC79_AIoT_SDK/raw/AC79NN_SDK_V1.2.1_2023-12-13/cpu/wl82/tools/$file" -o "$dest"
           done
       - name: Build actual firmware
         run: sh build.sh

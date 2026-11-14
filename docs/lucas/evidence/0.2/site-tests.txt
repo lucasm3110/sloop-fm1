@@ -1,0 +1,20 @@
+site: the editor links the offline file (download)                           ok
+site: the installer page links it too                                        ok
+site: offline: the icon font inlined                                         ok
+site: offline: no download link to itself                                    ok
+site: offline: the installer and the font licence online                     ok
+site: offline: no other file next to it (no relative src / href)             ok
+site: offline: no url() to a file                                            ok
+site: offline: no app, no service worker (a file has no site)                ok
+site: /var/folders/xc/wwq4g33j3h360245k8mblmxm0000gn/T/tmpqg6ap95g/site: webapp/installer (33965 B), webapp/editor, firmware/sloop-9.9.fwsc (4096 B, FM-1_900)
+site: sw.js: stamped with the version                                        ok
+site: sw.js keeps the installer, the editor, its font, the firmware          ok
+site: sw.js: every file it keeps is in the site                              ok
+site: manifest: standalone, starts at the editor, icons 192 and 512 (+ maskable) ok
+site: editor: links the manifest, registers ../sw.js, an install button      ok
+site: installer: links the manifest, registers ../sw.js, an install button   ok
+site: /var/folders/xc/wwq4g33j3h360245k8mblmxm0000gn/T/tmpqg6ap95g/site2: webapp/installer (33965 B), webapp/editor, firmware/sloop-9.9.fwsc (4096 B, FM-1_900)
+site: /var/folders/xc/wwq4g33j3h360245k8mblmxm0000gn/T/tmpqg6ap95g/site2: webapp/installer (33965 B), webapp/editor, firmware/sloop-9.9.fwsc (4096 B, FM-1_900)
+site: sw.js: the same site, the same stamp; a file changed, a new one        ok
+site: offline editor and offline site test passed
+site: build/v02-final/pwa-site: webapp/installer (33965 B), webapp/editor, firmware/sloop-0.2.fwsc (610076 B, FM-1_802)

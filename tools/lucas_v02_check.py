@@ -7,7 +7,7 @@ from PIL import Image
 from lucas_metrics import report,symbols
 p=argparse.ArgumentParser();p.add_argument('directory',type=Path);p.add_argument('--runner',required=True);a=p.parse_args();out=a.directory
 fw=out/'felucca.play.fwsc';elf=out/'felucca.elf';syms=symbols(elf);boot_late=0
-def run(name,script,ms=10500):
+def run(name,script,ms=11500):
     env=dict(os.environ,FM1_STRICT='1',FM1_LCD_TIMED='1',FM1_BENCH_KEYS=script,FM1_BENCH_PANEL=str(out/(name+'.ppm')),FM1_BENCH_WAV=str(out/(name+'.pcm')),FM1_DUMPRAM=str(out/(name+'.ram')))
     env.pop('FM1_BENCH_NOKEYS',None)
     with (out/(name+'.log')).open('w') as f:subprocess.run([a.runner,'--fwsc',str(fw),'--midi','none','--mhz','240','--bench',str(ms)],env=env,stdout=f,stderr=f,check=True)
@@ -27,19 +27,20 @@ assert boot_late<=1,('startup misses',boot_late)
 s,mem=run('preloaded','3000:LFO,3180:LFO^,3600:EDIT,3780:EDIT^,4300:e0:+1,4800:EDIT,4980:EDIT^')
 lib=mem('lf_library');stride=len(lib)//10;assert all(lib[i*stride+53] for i in range(10))
 run('starter-beat','3000:PLAY,3180:PLAY^,4000:SEQ,4180:SEQ^')
-note=',4000:C4,7500:C4^'
+# 127 detents take about 1 s of physical quadrature edges; let them settle before bypass.
+note=',5000:C4,8500:C4^'
 reference,_=run('fx-dry','3000:HOME,3180:HOME^'+note)
 for name,section,knobs in [('eq',0,'3400:e2:+110'),('drive',1,'3400:e2:+100'),('mod',2,'3400:e2:+127,3500:e4:+87'),('grain',3,'3400:e2:+127,3500:e5:+127'),('delay',4,'3400:e2:+100'),('reverb',5,'3400:e2:+72')]:
     script=f'3000:FX,3180:FX^,3300:e0:+{section},'+knobs+note
     wet,mem=run('fx-'+name,script)
     assert mem('lf_cpu_guard')==b'\0',name+' bypassed by CPU guard'
     # Same clock/note schedule: require substantial waveform change over the note and tail.
-    lo,hi=round(4.5*44100)*2,min(len(wet),len(reference),round(9*44100)*2)
+    lo,hi=round(5.5*44100)*2,min(len(wet),len(reference),round(10*44100)*2)
     diff=sum(abs(wet[i]-reference[i]) for i in range(lo,hi))/(hi-lo)
     assert diff>20,(name,diff)
     print(f'PASS: {name} changes captured firmware audio, mean absolute difference {diff:.1f}',flush=True)
     if name in ['eq','grain']:
-        dry,mem=run('fx-'+name+'-bypass',script.replace(note,',3700:EDIT,3880:EDIT^'+note))
+        dry,mem=run('fx-'+name+'-bypass',script.replace(note,',4600:EDIT,4780:EDIT^'+note))
         idx=5 if name=='eq' else 14
         assert mem('lf')[idx]==0,(name,'bypass not applied')
 print('PASS: ten preloaded imports, audible starter drum machine, six real audio effects and accessible bypass')

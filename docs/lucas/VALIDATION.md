@@ -1,10 +1,12 @@
 # Lucas FM 0.1 — verification and limits
 
+Historical release report. See [0.2 changes and validation](0.2.md) for the current package.
+
 This is an actual compiled FM-1 firmware fork, tested with the native FM-1 emulator. **No physical FM-1 was flashed. Physical audio, USB, controls, recovery and long-session reliability remain unverified.** TeleNeuMu and Geara are unrelated and were not modified.
 
 ## Reproducible identity
 
-The exact compiled source commit is in `dist/source-commit.txt`; `dist/SHA256SUMS` identifies the delivered package. The delivery/documentation commit can be newer than that source commit without changing the firmware. Upstream: `bac9c05ea7627449405aa10e48da21d75b6c8c56`. Native emulator: `883e10f8b37d25dbac1786cc6370f459a8f3d4a4`. See DEVELOPMENT.md for build and replay commands.
+The exact compiled source commit is in `dist/source-commit-0.1.txt`; `dist/SHA256SUMS` identifies the delivered package. The delivery/documentation commit can be newer than that source commit without changing the firmware. Upstream: `bac9c05ea7627449405aa10e48da21d75b6c8c56`. Native emulator: `883e10f8b37d25dbac1786cc6370f459a8f3d4a4`. See DEVELOPMENT.md for build and replay commands.
 
 Baseline SLOOP was compiled and run before firmware changes. Every automated release replay starts with flash generated from its own package: restoring old full emulator flash would also restore old code. The package identity is FM-1_801, with LUCAS FM 0.1 on screen.
 

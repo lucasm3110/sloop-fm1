@@ -1,0 +1,38 @@
+{
+  "data_bss_bytes": 85500,
+  "data_bss_limit": 98304,
+  "pool_bytes": 333900,
+  "pool_limit": 344064,
+  "lowram_bytes": 22772,
+  "app_bytes": 580968,
+  "audio": {
+    "magic": 1145194289,
+    "halves": 5597,
+    "max_us": 4925,
+    "nested": 136476,
+    "in_audio": 1,
+    "late": 0,
+    "timer_irqs": 324779,
+    "ui_frames": 1581,
+    "last_us": 4150,
+    "cpu_q8": 180,
+    "boots": 1,
+    "stage": 2,
+    "page": 37,
+    "home": 0,
+    "prev_stage": 0,
+    "prev_page": 0,
+    "prev_home": 0,
+    "prev_rst": 0,
+    "prev_frames": 0,
+    "last_cpu_percent": 70.31,
+    "buffer_deadline_us": 5804,
+    "shed_count": 0,
+    "fx_guard": 1,
+    "pitched_voices": [
+      4,
+      3,
+      0
+    ]
+  }
+}

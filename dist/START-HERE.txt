@@ -1,21 +1,20 @@
-Lucas FM 0.1 for M-VAVE FM-1
+Lucas FM 0.2 for M-VAVE FM-1
 
-Actual firmware, validated in the native emulator. No physical device has been flashed.
+Open lucas-fm-0.2.fwsc with Open .fwsc in https://joakimeriksson.github.io/fm1-emu/ and choose 240 MHz. Ten public imported sounds, factory instruments/kits and an editable starter beat are already present. Press PLAY for drums; LFO opens loops.
 
-On the development Mac: double-click Launch Lucas FM.command in the LucasFM repository. Your personal collection and USR1 drum kit are already loaded there.
+ALGORITHM selects the part. PRESETS browses sounds. EDIT opens Sound; SELECT there chooses the engine. HOME always returns. FX opens effects, SELECT chooses an effect, EDIT toggles bypass, and the four knobs follow the screen labels.
 
-Elsewhere: open lucas-fm-0.1.fwsc with Open .fwsc in https://joakimeriksson.github.io/fm1-emu/ . This loads the custom firmware, not stock SLOOP. Use 240 MHz for the documented full workload.
+On the development Mac: Launch Lucas FM.command uses your ignored private 0.2 package when available, including your personal drum kit. Personal audio is not in this public bundle.
 
-Native emulator: fm1-live --fwsc lucas-fm-0.1.fwsc --flash emulator-only-starter.bin --midi none --mhz 240
-The .bin is an emulator-only snapshot, NOT a physical update file.
+Native emulator: fm1-live --fwsc lucas-fm-0.2.fwsc --midi none --mhz 240
 
-The public starter .lucaspack contains ten short imported sounds (four concurrent). Load it through Samples / Lucas FM Imported loop collection in the existing editor. It replaces all four user sample slots. Personal audio is not included.
+lucas-fm-0.2-update.fwsc is the firmware-only package. The physical updater preserves samples and does not install the preloaded collection. Transfer the .lucaspack separately with the editor on hardware. No physical device has been flashed or tested.
 
-GUIDE.md explains physical controls and preparation. VALIDATION.md lists exact measurements and limits. DEVELOPMENT.md explains reproducible builds. source-commit.txt and SHA256SUMS identify the exact tested firmware.
+GUIDE.md explains controls. 0.2.md records current validation and limits. VALIDATION.md is historical 0.1 evidence. DEVELOPMENT.md explains builds. source-commit.txt and SHA256SUMS identify this firmware.
 
-Limits: independent pitch/tempo preparation is offline; full workload fails at 100 MHz; extreme loads pause shared effects and can reach the visible voice limit. See the measured supported workloads. Full upstream CI retains four static instruction-budget failures. Physical-device checks remain outstanding.
+Limits: four concurrent imports, eight shared pitched voices, offline pitch/tempo preparation. Heavy VOICE presets can pause shared effects; 100 MHz full workloads overload. Full upstream CI retains known static instruction-budget failures; see the report.
 
 Complete corresponding source and licenses:
-https://github.com/lucasm3110/sloop-fm1/tree/334dfb74c2e010879760981a1bec67f3da3b91b6
+https://github.com/lucasm3110/sloop-fm1/tree/0bce425064ef00b5b3bc711c6b4f14a0d47970d9
 Documentation and companion tools:
 https://github.com/lucasm3110/sloop-fm1/tree/codex/lucas-fm

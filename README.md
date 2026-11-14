@@ -2,14 +2,14 @@
 
 Lucas FM development is on **codex/lucas-fm**. This is a separate project from TeleNeuMu and Geara.
 
-- [Compiled custom firmware](dist/lucas-fm-0.1.fwsc) · [source commit](dist/source-commit.txt) · [SHA-256](dist/SHA256SUMS)
+- [Compiled custom firmware](dist/lucas-fm-0.2.fwsc) · [source commit](dist/source-commit.txt) · [SHA-256](dist/SHA256SUMS)
 - [Controls, loops, effects and saving](docs/lucas/GUIDE.md)
 - [Build and emulator instructions](docs/lucas/DEVELOPMENT.md)
-- [Validation, limits and completion checklist](docs/lucas/VALIDATION.md)
-- [Actual firmware screenshots](docs/lucas/screenshots/overview.png)
+- [0.2 navigation, effects, preloaded sounds and tests](docs/lucas/0.2.md)
+- [Actual firmware screenshots](docs/lucas/screenshots/0.2/overview.png)
 - [Ten-sound CC0 starter collection](assets/loops-cc0/park-in-d.lucaspack)
 
-Validated in the native emulator; **physical hardware has not been flashed or tested**. Four imported layers can play at once. Key/tempo variants are prepared offline. Full-load timing requires the device's nominal 240 MHz; the requested 100 MHz emulator stress case overloads. Personal Desktop audio stays in the ignored `private/` folder.
+Validated in the native emulator; **physical hardware has not been flashed or tested**. The play-ready package boots with ten imported sounds and an editable drum beat. Four imported layers can play at once. Key/tempo variants are prepared offline. Full-load timing requires the device's nominal 240 MHz; the requested 100 MHz emulator stress case overloads. Personal Desktop audio stays in the ignored `private/` folder.
 
 The upstream README and its credits follow.
 
