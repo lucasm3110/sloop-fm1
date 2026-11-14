@@ -1,0 +1,20 @@
+Lucas FM starter collection: Park in D, prepared for D / 72 BPM.
+
+Birds, River, Wind, Birdsong, Stream, Park air: excerpts from Park Ambiences
+by Thimras, CC0 1.0, published 2022-07-25.
+https://opengameart.org/content/park-ambiences
+https://creativecommons.org/publicdomain/zero/1.0/
+Original files: park_ambience_birds.wav, park_ambience_river.wav,
+park_ambience_wind.wav. Original hashes and excerpt offsets: provenance.json.
+Converted to mono / 16 kHz; trimmed, normalized and boundary tapered by lucas_pack.py.
+
+Warm pad, Glass pad, Sine pad: rendered from SLOOP's ANALOG WARM PAD,
+DIGITAL GLASS PAD and ANALOG SINE PAD at D4. SLOOP / Felucca code credits
+and licenses remain in LICENSING.md. Reproduce with tests/lucas_render.c.
+Soft beat: original one-bar 72 BPM arrangement of Versilian Studios VCSL
+CC0 kick, snare and hi-hat. See ../samples-cc0/ATTRIBUTION.txt for exact sources.
+The original arrangement and generated pad recordings are dedicated to CC0.
+
+The Desktop search found no user drum samples. No private samples are published.
+Storage is shared with SLOOP user sample instruments and drum kits. Installing
+this collection replaces all four user sample slots; export a backup first.

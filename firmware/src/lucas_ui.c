@@ -1,10 +1,10 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 /* Physical-control UI. SELECT chooses the destination on HOME; each destination
  * also has a dedicated tap. No encoder pushes, touch input, or required holds. */
-enum { LF_HOME, LF_PLAY, LF_SOUND, LF_SEQUENCE, LF_LOOPS, LF_MIX, LF_KEY, LF_EFFECTS, LF_SAVE, LF_ADV=255 };
+enum { LF_HOME, LF_PLAY, LF_SOUND, LF_SEQUENCE, LF_LOOPS, LF_MIX, LF_KEY, LF_EFFECTS, LF_SAVE, LF_LOOPINFO, LF_ADV=255 };
 static uint8_t lf_page,lf_dest=1,lf_effect,lf_fxpage,lf_pick,lf_save_action,lf_confirm;
 static uint32_t lf_confirm_ms;
-static const char *const LF_PAGE[]={"HOME","PLAY","SOUND","SEQUENCE","LOOPS","MIX","KEY & TEMPO","EFFECTS","SAVE"};
+static const char *const LF_PAGE[]={"HOME","PLAY","SOUND","SEQUENCE","LOOPS","MIX","KEY & TEMPO","EFFECTS","SAVE","LOOP SETTINGS"};
 static const char *const LF_ROLE[]={"PAD","BASS","MELODY","DRUMS"};
 static const char *const LF_EFFECT[]={"SHAPE","EQ","DRIVE","MODULATION","GLITCH / GRAIN","DELAY","REVERB"};
 static const uint16_t LF_COLOR[]={RGB(172,151,255),RGB(66,218,198),RGB(255,199,104),RGB(255,112,143)};
@@ -13,9 +13,10 @@ static const uint16_t LF_BG=RGB(8,9,13),LF_DIM=RGB(135,133,158),LF_TEXT=RGB(232,
 static uint32_t lf_dirty(void); /* project.c: compares with the last persisted working song */
 UI_SMALL static void lf_open(uint32_t p)
 {
+    lf_advanced=(uint8_t)(p==LF_ADV);
     lf_page=(uint8_t)p; lf_confirm=0; ui.force=1; ui.menu=0; vis_on=0;
     ui.layer=LY_PLAY; ly_lock=LY_PLAY; song.seq_mode=0; kb_grid=0;
-    lf_loop_page=(uint8_t)(p==LF_LOOPS);
+    lf_loop_page=(uint8_t)(p==LF_LOOPS || p==LF_LOOPINFO);
 }
 UI_SMALL static void lf_release(uint32_t tracks) { panic_req|=(uint8_t)tracks; }
 UI_SMALL static void lf_key_change(uint32_t id,int32_t delta)
@@ -46,7 +47,7 @@ UI_SMALL static void lf_fx_knob(uint32_t k,int32_t s)
     static const uint8_t grain[]={LF_GMIX,LF_GSIZE,LF_GDELAY,LF_SCATTER,LF_DENSITY,LF_RANDOM,LF_FEEDBACK,LF_GWIDTH};
     switch(lf_effect) {
     case 0: lf_pedit(env[k],s); break;
-    case 1: if(!lf_fxpage) lf_edit(eq[k],s); else if(k==0) lf_edit(LF_HIGH,s); else if(k==3) lf[LF_EQ]=(uint8_t)(s>0); break;
+    case 1: if(!lf_fxpage) lf_edit(eq[k],s); else if(k==0) lf_edit(LF_HIGH,s); else if(k==3) lf[LF_EQ]=(uint8_t)(s<0); break;
     case 2: if(k<3) lf_edit(LF_DRIVE+k,s); break;
     case 3: lf_edit(LF_AMOUNT+k,s); break;
     case 4: lf_edit(grain[k+4u*(lf_fxpage!=0)],s); break;
@@ -75,21 +76,21 @@ UI_SMALL static int lf_ui_input(uint32_t pressed)
     case B_SCL: lf_open(lf_page==LF_KEY?LF_HOME:LF_KEY); break;
     case B_EDIT:
         if(lf_page==LF_HOME) lf_open(lf_dest);
-        else if(lf_page==LF_LOOPS) { int rc; fm1_irq_off(); rc=lf_loop_toggle(lf_pick); fm1_irq_on();
+        else if(lf_page==LF_LOOPS || lf_page==LF_LOOPINFO) { int rc; fm1_irq_off(); rc=lf_loop_toggle(lf_pick); fm1_irq_on();
             if(rc) ui_message(rc==1?"IMPORT A LOOP PACK":rc==2?"PREPARE KEY / BPM":"4 LAYERS BUSY"); }
         else if(lf_page==LF_SEQUENCE) { undo_swap(undo.undone?1:0); }
         else if(lf_page==LF_SAVE) {
-            if(lf_save_action==2) { lf_page=LF_ADV; ui.menu=1; ui.menu_sel=0; ui.force=1; break; }
+            if(lf_save_action==2) { lf_page=LF_ADV;lf_advanced=1; ui.menu=1; ui.menu_sel=0; ui.force=1; break; }
             if(!lf_confirm || fm1_ms-lf_confirm_ms>3000u) { lf_confirm=1;lf_confirm_ms=fm1_ms;ui_message("EDIT AGAIN TO CONFIRM"); }
             else { lf_confirm=0; if(lf_save_action==0) project_save((uint32_t)song.g[G_SLOT]-1u);
                 else project_load((uint32_t)song.g[G_SLOT]-1u); }
         } else lf_open(LF_SOUND); break;
     case B_ENV: lf_effect=0;lf_fxpage=0;lf_open(LF_EFFECTS);break;
     case B_FX: if(lf_page==LF_EFFECTS) { lf_fxpage^=1; ui.force=1; } else lf_open(LF_EFFECTS);break;
-    case B_LFO: lf_open(LF_LOOPS); break;
+    case B_LFO: lf_open(lf_page==LF_LOOPS?LF_LOOPINFO:LF_LOOPS); break;
     case B_GLO: lf_open(LF_MIX); break;
     case B_ARP: if(lf_page==LF_PLAY) { lf_release(1u<<song.sel);TSEL->p[P_AHOLD]^=1; } else lf_open(LF_PLAY);break;
-    case B_SEQ: if(lf_page==LF_SEQUENCE) { lf_page=LF_ADV; open_family(FAM_SEQ); if(is_drum(TSEL)) studio_open(SC_DRUM); }
+    case B_SEQ: if(lf_page==LF_SEQUENCE) { lf_page=LF_ADV;lf_advanced=1; open_family(FAM_SEQ); if(is_drum(TSEL)) studio_open(SC_DRUM); }
                 else lf_open(LF_SEQUENCE);break;
     case B_SAVE: lf_open(LF_SAVE);break;
     case B_OCTDN: case B_OCTUP:
@@ -102,7 +103,7 @@ UI_SMALL static int lf_ui_input(uint32_t pressed)
     if((s=panel_enc(EN_ALGO))) { lf_release(1u<<song.sel); track_select((uint32_t)clamp(song.sel+(s>0?1:-1),0,3)); }
     if((s=panel_enc(EN_SELECT))) {
         if(lf_page==LF_HOME) lf_dest=(uint8_t)clamp(lf_dest+s,1,5);
-        else if(lf_page==LF_LOOPS) lf_pick=(uint8_t)clamp(lf_pick+s,0,9);
+        else if(lf_page==LF_LOOPS || lf_page==LF_LOOPINFO) lf_pick=(uint8_t)clamp(lf_pick+s,0,9);
         else if(lf_page==LF_EFFECTS) { lf_effect=(uint8_t)clamp(lf_effect+s,0,6);lf_fxpage=0; }
         else if(lf_page==LF_SAVE) lf_save_action=(uint8_t)clamp(lf_save_action+s,0,2);
         else lf_gedit(G_BPM,s);
@@ -110,6 +111,8 @@ UI_SMALL static int lf_ui_input(uint32_t pressed)
     if((s=panel_enc(EN_PRESET))) {
         if(lf_page==LF_SOUND) { uint32_t total,cur=preset_pos(&total); if(is_drum(TSEL)) lf_pedit(P_E0,s);
             else if(total) preset_go((uint32_t)clamp((int32_t)cur+s,0,(int32_t)total-1)); }
+        else if(lf_page==LF_SEQUENCE) { uint32_t section=(uint32_t)clamp(song.g[G_SLOT]-1+s,0,3);song.g[G_SLOT]=(int16_t)(section+1);
+            if(project_used(section)) section_load(section); else ui_message("EMPTY SECTION"); }
         else if(lf_page==LF_EFFECTS && lf_effect==3) lf[LF_MOD]=(uint8_t)clamp(lf[LF_MOD]+s,0,3);
         else if(lf_page==LF_EFFECTS && lf_effect==4) lf[LF_PITCH]=(uint8_t)clamp(lf[LF_PITCH]+s,0,2);
     }
@@ -123,7 +126,16 @@ UI_SMALL static int lf_ui_input(uint32_t pressed)
             else if(k==2) { if(is_drum(TSEL)) lf_gedit(G_DRREV,s); else lf_pedit(P_REV,s); }
             else lf_mode_set(clamp((int32_t)lf_mode()+s,0,2));
         } else if(lf_page==LF_LOOPS) { uint32_t id=(lf_pick/4)*4+k; if(id<10) lf_edit(LF_LEVEL+id,s); }
-        else if(lf_page==LF_MIX) {
+        else if(lf_page==LF_LOOPINFO) {
+            const lf_meta_t *m=&lf_library[lf_pick].meta;
+            if(k==0) lf_edit(LF_LEVEL+lf_pick,s);
+            else if(k==1 || k==2) {
+                uint8_t flag=(uint8_t)(1u<<(k-1));
+                if(s<0) lf[LF_FLAGS+lf_pick]&=(uint8_t)~flag;
+                else if((k==1 && m->root<12) || (k==2 && m->bpm)) lf[LF_FLAGS+lf_pick]|=flag;
+                else ui_message("PACK NEEDS METADATA");
+            }
+        } else if(lf_page==LF_MIX) {
             if(k==0) { if(is_drum(TSEL)) lf_gedit(G_DRLVL,s);else lf_pedit(P_LEVEL,s); }
             if(k==1) lf_pedit(P_PAN,s);
             if(k==2) TSEL->p[P_MUTE]=(int16_t)(s>0);
@@ -162,6 +174,11 @@ UI_SMALL static void lf_values(const char **lab,char val[4][16])
     } else if(lf_page==LF_LOOPS) {
         static const char *const nums[]={"1","2","3","4","5","6","7","8","9","10"};
         for(k=0;k<4;k++) {uint32_t id=lf_pick/4*4+k;lab[k]=id<10?nums[id]:"";if(id<10) fmt_int(val[k],lf[LF_LEVEL+id]*100/127);else val[k][0]=0;}
+    } else if(lf_page==LF_LOOPINFO) {
+        lab[0]="LEVEL";lab[1]="KEY";lab[2]="BPM";lab[3]="";
+        fmt_int(val[0],lf[LF_LEVEL+lf_pick]*100/127);
+        str_cpy(val[1],lf[LF_FLAGS+lf_pick]&1?"FOLLOW":"FREE",16);
+        str_cpy(val[2],lf[LF_FLAGS+lf_pick]&2?"FOLLOW":"FREE",16);val[3][0]=0;
     } else if(lf_page==LF_SEQUENCE) {
         lab[0]="BARS";lab[1]="COUNT";lab[2]="QUANT";lab[3]="CLICK";
         fmt_int(val[0],TSEL->p[P_SLEN]/16);str_cpy(val[1],rec_count?"1 BAR":"NOTE",16);
@@ -211,10 +228,19 @@ UI_SMALL static int lf_ui_draw(void)
     for(row=0;row<6;row++) {
         uint32_t sig=2166136261u;
         cv_oy=0;cv_begin(240,40,LF_BG);
-        if(!row) {
+        if(!row && lf_page==LF_HOME) {
+            char bpm[16];fmt_int(bpm,song.g[G_BPM]);
+            cv_text(7,3,&FONT_L,N_NOTE[trk[0].p[P_ROOT]%12],LF_TEXT);
+            lf_text(50,16,N_SCALE[trk[0].p[P_SCALE]%NSCALES],LF_COLOR[0]);
+            cv_text(133,3,&FONT_L,bpm,LF_TEXT);lf_text(187,16,"BPM",LF_DIM);
+            if(song.playing)cv_rect(230,4,6,6,LF_COLOR[1]);
+            if(song.rec || rec_wait)cv_rect(230,16,6,6,LF_COLOR[3]);
+            if(lf_dirty())lf_text(228,25,"*",LF_COLOR[2]);
+        } else if(!row) {
             lf_text(5,0,LF_PAGE[lf_page],LF_COLOR[song.sel]);
-            lf_text(164,0,song.rec?"REC":rec_wait?"ARM":song.playing?"PLAY":"STOP",song.rec?LF_COLOR[3]:LF_TEXT);
-            lf_text(5,20,lf_page==LF_HOME?"LUCAS FM":LF_ROLE[song.sel],LF_DIM);
+            lf_text(164,0,ci_on?"COUNT":song.rec?"REC":rec_wait?"ARM":song.playing?"PLAY":"STOP",song.rec?LF_COLOR[3]:LF_TEXT);
+            lf_text(5,20,(lf_page==LF_LOOPS || lf_page==LF_LOOPINFO)?"10 SOUNDS / 4 LAYERS":LF_ROLE[song.sel],LF_DIM);
+            if(ci_on)lf_num(206,20,4-ci_beat,LF_COLOR[3]);
             if(lf_dirty()) lf_text(224,20,"*",LF_COLOR[2]);
         } else if(row==5) lf_footer(lab,val);
         else if(lf_page==LF_HOME || lf_page==LF_SEQUENCE || lf_page==LF_MIX) {
@@ -235,12 +261,27 @@ UI_SMALL static int lf_ui_draw(void)
             uint8_t ns[4]={(uint8_t)last_note,0,0,0};char name[16];uint32_t nn=1;
             if(TSEL->p[P_CHORD]) nn=chord_notes(TSEL,last_note,ns);
             lf_chord_name(name,ns,nn);
-            if(row==1) {lf_text(8,4,lf_mode()?"NUMBER MODE":"GUIDED PIANO",LF_DIM);lf_text(168,23,TSEL->p[P_AHOLD]?"HELD":"FREE",LF_COLOR[0]);}
-            if(row==2) {cv_text(82,0,&FONT_L,name,LF_COLOR[song.sel]);}
-            if(row==3) {int x=56;for(k=0;k<nn;k++) {lf_text(x,0,N_NOTE[ns[k]%12],LF_TEXT);x+=40;}}
-            if(row==4) {for(k=0;k<16;k++) {uint32_t key=key_of_white(k),note=kb_map(TSEL,key);uint16_t c=LF_DIM;
-                if(lf_mode()) c=note==last_note?LF_TEXT:LF_COLOR[0];else if((scale_mask(TSEL)>>((53+key-TSEL->p[P_ROOT]+120)%12))&1u)c=LF_COLOR[0];
-                cv_rect(5+k*14,4,11,30,c);if(lf_mode()){char b[2]={(char)('1'+((k+3)%7)),0};cv_text(7+k*14,10,&FONT_S,b,LF_BG);} }
+            if(lf_mode() && !is_drum(TSEL)) {
+                static const int16_t xy[7][2]={{120,15},{176,43},{190,96},{151,140},{89,140},{50,96},{64,43}};
+                uint32_t deg=0,mask=scale_mask(TSEL),d=(last_note+120-TSEL->p[P_ROOT])%12;
+                for(k=0;k<d;k++) if(mask&(1u<<k))deg++;
+                cv_oy=-(int32_t)(row-1)*40;
+                for(k=0;k<7;k++) {
+                    uint32_t next=(k+1)%7;int x=xy[k][0],y=xy[k][1],dx,dy;
+                    cv_line(x,y,xy[next][0],xy[next][1],RGB(48,43,66));
+                    for(dy=-11;dy<=11;dy++)for(dx=-11;dx<=11;dx++)if(dx*dx+dy*dy<=121)cv_pset(x+dx,y+dy,k==deg?LF_COLOR[0]:RGB(45,40,62));
+                    lf_num(x-4,y-8,k+1,k==deg?LF_BG:LF_TEXT);
+                }
+                cv_text(120-text_w(&FONT_L,name)/2,63,&FONT_L,name,LF_COLOR[song.sel]);
+                {int width=0,x;for(k=0;k<nn;k++)width+=text_w(&FONT_S,N_NOTE[ns[k]%12])+8;x=120-width/2;
+                    for(k=0;k<nn;k++){lf_text(x,99,N_NOTE[ns[k]%12],LF_TEXT);x+=text_w(&FONT_S,N_NOTE[ns[k]%12])+8;}}
+                lf_text(180,0,TSEL->p[P_AHOLD]?"HELD":"FREE",LF_DIM);cv_oy=0;
+            } else {
+                if(row==1)lf_text(8,4,is_drum(TSEL)?"DRUM KEYS":"GUIDED PIANO",LF_DIM);
+                if(row==2)cv_text(82,0,&FONT_L,name,LF_COLOR[song.sel]);
+                if(row==3)lf_text(8,5,"ALL NOTES PLAYABLE",LF_DIM);
+                if(row==4)for(k=0;k<27;k++) {uint32_t note=53+k;uint16_t c=(scale_mask(TSEL)>>((note-TSEL->p[P_ROOT]+120)%12))&1u?LF_COLOR[0]:LF_DIM;
+                    cv_rect(4+k*8,4,6,30,c);}
             }
         } else if(lf_page==LF_SOUND) {
             uint32_t total,at=preset_pos(&total),index;int32_t pos=(int32_t)at+(int32_t)row-2;
@@ -256,11 +297,18 @@ UI_SMALL static int lf_ui_draw(void)
             if(id==lf_pick) cv_rect(0,0,3,40,LF_COLOR[0]);
             lf_num(6,0,id+1,LF_DIM);lf_text(30,0,lf_library[id].valid?lf_library[id].meta.name:"EMPTY",LF_TEXT);
             lf_text(30,20,!lf_library[id].valid?"IMPORT":!lf_matches(id)?"PACK MISMATCH":state,LF_COLOR[1]);lf_num(190,20,lf[LF_LEVEL+id]*100/127,LF_DIM);
+        } else if(lf_page==LF_LOOPINFO) {
+            const lf_meta_t *m=&lf_library[lf_pick].meta;
+            if(row==1)lf_text(8,12,lf_library[lf_pick].valid?m->name:"EMPTY",LF_COLOR[1]);
+            if(row==2) {lf_text(8,4,"PACK KEY",LF_DIM);lf_text(120,4,m->root<12?N_NOTE[m->root]:"NATURAL",LF_TEXT);
+                lf_text(8,22,"PACK BPM",LF_DIM);if(m->bpm)lf_num(120,22,m->bpm,LF_TEXT);else lf_text(120,22,"FREE",LF_TEXT);}
+            if(row==3)lf_text(8,12,lf_matches(lf_pick)?"READY / ORIGINAL AUDIO":"PREPARE MATCHING PACK",LF_TEXT);
+            if(row==4)lf_text(8,8,"EDIT PLAY / LFO BACK",LF_DIM);
         } else if(lf_page==LF_EFFECTS) {
             if(row==1) lf_text(8,12,LF_EFFECT[lf_effect],LF_COLOR[song.sel]);
             if(row==2) lf_text(8,8,lf_effect==0?"SELECTED TRACK":lf_effect>=5?"SEND / SHARED BUS":"SHARED MASTER",LF_DIM);
             if(row==3 && lf_effect==3) {static const char *const mod[]={"CHORUS","VIBRATO","TREMOLO","PHASER"};lf_text(8,8,mod[lf[LF_MOD]%4],LF_TEXT);}
-            if(row==3 && lf_effect==4) {static const char *const pitch[]={"OCTAVES","IN KEY: LIVE ROOT","FREE"};lf_text(8,8,pitch[lf[LF_PITCH]%3],LF_TEXT);}
+            if(row==3 && lf_effect==4) {static const char *const pitch[]={"OCTAVES","IN KEY: TONAL LOOP","FREE"};lf_text(8,8,pitch[lf[LF_PITCH]%3],LF_TEXT);}
             if(row==4) lf_text(8,8,(lf_effect==1 || lf_effect==4)?(lf_fxpage?"FX > PAGE 1":"FX > PAGE 2"):"SELECT: EFFECT",LF_DIM);
         } else if(lf_page==LF_SAVE) {
             static const char *const action[]={"SAVE SECTION","LOAD SECTION","SYSTEM / UPDATE"};

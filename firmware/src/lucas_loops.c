@@ -27,26 +27,39 @@ static void lf_loops_stop(void)
 }
 static void lf_library_scan(void)
 {
-    uint32_t s,j;
+    uint32_t s,j,fingerprint=0,stored=0;
+    for(j=0;j<5;j++) stored|=(uint32_t)lf[LF_ID+j]<<(j*7);
     if(lf_scan_gen==smp_user_gen) return;
+    fm1_irq_off();
     lf_scan_gen=smp_user_gen;
     memset(lf_layers,0,sizeof lf_layers);
     memset(lf_library,0,sizeof lf_library);
     for(s=0;s<SMP_USER_SLOTS;s++) {
         const smp_user_hdr_t *h=(const smp_user_hdr_t*)smp_user_xip(s);
         if(!usr_nz[s] || h->rsv2[0]!=LF_PACK_MAGIC || h->data_len<128u || h->nz>4u) continue;
+        fingerprint^=h->crc+(s+1u)*0x9E3779B9u;
         for(j=0;j<h->nz;j++) {
             const lf_meta_t *m=(const lf_meta_t*)(smp_user_xip(s)+512u+j*24u);
             uint32_t id=m->id,k;
             if(id>=LF_LIBRARY || m->kind>2u || m->flags>3u || (m->root>11u && m->root!=255u) ||
                m->bpm>300u || m->bars>16u || h->zone[j].off<128u || !h->zone[j].looped ||
                h->zone[j].rate>65536u || !smp_zone_ok(&h->zone[j],h->data_len)) continue;
-            lf_library[id].zone=usr_zone[s][j]; lf_library[id].meta=*m;
+            lf_library[id].zone=h->zone[j]; lf_library[id].meta=*m;
             for(k=0;k<11u;k++) if((uint8_t)lf_library[id].meta.name[k]<32u || (uint8_t)lf_library[id].meta.name[k]>126u) lf_library[id].meta.name[k]=0;
             lf_library[id].meta.name[11]=0;
             lf_library[id].slot=(uint8_t)s; lf_library[id].valid=1;
         }
     }
+    if(fingerprint!=stored) {
+        for(j=0;j<10;j++)lf[LF_FLAGS+j]=lf_library[j].valid?lf_library[j].meta.flags:0;
+        for(j=0;j<5;j++)lf[LF_ID+j]=(uint8_t)((fingerprint>>(j*7))&127u);
+    }
+    fm1_irq_on();
+}
+static int32_t lf_sample_next(const lf_entry_t *e,voice_t *v)
+{
+    const uint8_t *data=smp_user_xip(e->slot)+512u;
+    return sample_decode(&e->zone,v,1,data[e->zone.off+(v->ph[0]>>1)]);
 }
 /* 0 success, 1 unavailable, 2 pack key/tempo mismatch, 3 four layers busy. */
 static int lf_loop_toggle(uint32_t id)
@@ -66,7 +79,7 @@ static int lf_loop_toggle(uint32_t id)
         memset(v,0,sizeof *v); v->id=(uint8_t)id; v->active=v->want=1;
         v->queued=(uint8_t)(lf_library[id].meta.kind==2u && song.playing);
         v->dec.gate=1;
-        v->next=sample_next(&lf_library[id].zone,&v->dec,1);
+        v->next=lf_sample_next(&lf_library[id],&v->dec);
         return 0;
     }
     return 3;
@@ -94,9 +107,9 @@ static void lf_loops_mix(int32_t *l,int32_t *r,uint32_t n)
             int32_t x;
             v->gain += clamp(target-v->gain,-8,8);
             if(v->queued && v->want && !v->gain) continue;
-            x=v->prev+(int32_t)(((int64_t)(v->next-v->prev)*v->frac)>>16);
+            x=v->prev+(((v->next-v->prev)*(int32_t)(v->frac>>1))>>15);
             v->frac+=e->zone.rate;
-            if(v->frac>=65536u) { v->frac-=65536u; v->prev=v->next; v->next=sample_next(&e->zone,&v->dec,1); }
+            if(v->frac>=65536u) { v->frac-=65536u; v->prev=v->next; v->next=lf_sample_next(e,&v->dec); }
             x=(x*v->gain)>>15;
             l[i]+=x; r[i]+=x;
             if(e->meta.kind==1 && e->meta.root==lf_grain_ref) lf_tonal[i]+=x;

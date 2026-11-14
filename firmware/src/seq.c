@@ -155,6 +155,9 @@ static uint32_t layer_buttons(void) { return fm1_in.buttons | (ly_lock != LY_PLA
  * else the locked one */
 static uint32_t layer_now(void)
 {
+#if LUCAS_FM
+    if(!lf_advanced) return LY_PLAY;
+#endif
     uint32_t b = layer_buttons(), l;
     for (l = LY_FX; l < LY_COUNT; l++)
         if (b & ly_bit[l])

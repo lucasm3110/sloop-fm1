@@ -113,9 +113,9 @@ static inline const smp_zone_t *smp_zone(uint32_t zi)
 
 /* voice: ph[0] position (samples), ph[1] fraction Q16, s[0] predictor, s[1] step
  * index, s[2] previous sample, s[3] current sample, s[4] zone, s[5] (UNISON) output samples before it starts */
-static inline int32_t sample_next(const smp_zone_t *z, voice_t *v, int loop)
+static inline int32_t sample_decode(const smp_zone_t *z, voice_t *v, int loop, uint32_t b)
 {
-    uint32_t pos = v->ph[0], b = SMP_DATA[z->off + (pos >> 1)];
+    uint32_t pos = v->ph[0];
     uint32_t code = (pos & 1u) ? (b >> 4) : (b & 15u);
     int32_t step = IMA_STEP[(uint32_t)v->s[1] <= 88u ? v->s[1] : 88], vd = step >> 3;
     if (code & 4u)
@@ -134,6 +134,11 @@ static inline int32_t sample_next(const smp_zone_t *z, voice_t *v, int loop)
     }
     v->ph[0] = pos;
     return v->s[0];
+}
+
+static inline int32_t sample_next(const smp_zone_t *z, voice_t *v, int loop)
+{
+    return sample_decode(z,v,loop,SMP_DATA[z->off+(v->ph[0]>>1)]);
 }
 
 static void sample_note_on(track_t *t, voice_t *v)

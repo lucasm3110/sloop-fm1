@@ -460,12 +460,12 @@ static void drum_tw_get(const project_t *p)
 #if LUCAS_FM
 static const uint8_t LF_STORE[]={P_ATK,P_DEC,P_SUS,P_REL,P_ED_FLT,P_ED_PIT,P_ED_SHP,P_ED_FX,
     P_LRATE,P_LWAVE,P_LPHASE,P_LFADE,P_LD_PIT,P_LD_FLT,P_LD_SHP,P_LD_AMP,
-    P_AMODE,P_ARATE,P_AOCT,P_AGATE,P_ASWING,P_APROB,P_AHOLD,P_AORDER};
-_Static_assert(LF_COUNT<=46,"Lucas extension fits drum synth fields");
+    P_AMODE,P_ARATE,P_AOCT,P_AGATE,P_ASWING,P_APROB,P_AHOLD,P_AORDER,P_GLIDE};
+_Static_assert(LF_COUNT<=48,"Lucas extension fits drum synth fields");
 static void lf_project_put(project_t *p)
 {
     uint32_t i;pt_set(&p->t[3],LF_STORE[0],0x4C31);
-    for(i=0;i<23;i++) {uint32_t a=i*2,b=a+1;
+    for(i=0;i<24;i++) {uint32_t a=i*2,b=a+1;
         pt_set(&p->t[3],LF_STORE[i+1],(int16_t)((a<LF_COUNT?lf[a]:0)|((b<LF_COUNT?lf[b]:0)<<8)));}
 }
 static void lf_project_get(const project_t *p)
@@ -606,10 +606,16 @@ UI_SMALL static void proj_fetch(uint32_t slot)
 #include "fm6_bank.c"                           /* the FM6 patch bank (eng_fm6.c PTCH B1..B27): staged in proj_tmp */
 #endif
 
+#if LUCAS_FM && !defined(PROJ_HOST)
+static int audio_quiet(void);
+#endif
 static const char *const SEC_NAME[4] = {"A", "B", "C", "D"};   /* (2.7: the slots named as the song's sections) */
 UI_SMALL static void project_save(uint32_t slot)
 {
     project_t *p = &proj_slot[slot & 3u];
+#if LUCAS_FM && !defined(PROJ_HOST)
+    if(!audio_quiet()) { ui_message("STOP SOUNDS BEFORE SAVE"); return; }
+#endif
 #if FELUCCA_ARRANGER
     if (song.playing || transport_req) { ui_message("STOP BEFORE SAVE"); return; }
 #endif

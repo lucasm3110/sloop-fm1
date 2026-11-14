@@ -1,3 +1,4 @@
+#include "../firmware/hal/fm1_flash_id.h"
 /* SPDX-License-Identifier: GPL-3.0-only */
 /* Host harness for the web editor's SysEx protocol (firmware/src/editor.c, editor_fm6.c, editor_dsyn.c,
  * editor_live.c) with the real storage.c / upreset.c / project.c (fm6_bank.c, arranger_scene.c) on a RAM image

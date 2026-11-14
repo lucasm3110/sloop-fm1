@@ -1,0 +1,44 @@
+[
+  {
+    "name": "Birds",
+    "source": "originals/birds.wav",
+    "sha256": "dc1a5ac34b89cab7f8f261b53a23da7c1c5e3cc895aae4cb6fb4a1a04001b2af",
+    "trim_start": 2,
+    "seconds": 3
+  },
+  {
+    "name": "River",
+    "source": "originals/river.wav",
+    "sha256": "da0c0c9b1249a83a1611cc116d5737b0864a8db9f45f1ae8dcc079d0f7c0bbbf",
+    "trim_start": 10,
+    "seconds": 3
+  },
+  {
+    "name": "Wind",
+    "source": "originals/wind.wav",
+    "sha256": "5c381856745b4706e7eba55eb9271a61a530e90c05df8126adb2db89ecfa6c5a",
+    "trim_start": 10,
+    "seconds": 3
+  },
+  {
+    "name": "Birdsong",
+    "source": "originals/birds.wav",
+    "sha256": "dc1a5ac34b89cab7f8f261b53a23da7c1c5e3cc895aae4cb6fb4a1a04001b2af",
+    "trim_start": 20,
+    "seconds": 3
+  },
+  {
+    "name": "Stream",
+    "source": "originals/river.wav",
+    "sha256": "da0c0c9b1249a83a1611cc116d5737b0864a8db9f45f1ae8dcc079d0f7c0bbbf",
+    "trim_start": 25,
+    "seconds": 3
+  },
+  {
+    "name": "Park air",
+    "source": "originals/wind.wav",
+    "sha256": "5c381856745b4706e7eba55eb9271a61a530e90c05df8126adb2db89ecfa6c5a",
+    "trim_start": 25,
+    "seconds": 3
+  }
+]

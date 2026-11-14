@@ -14,13 +14,13 @@ static uint32_t lf_rand(void) {lf_random^=lf_random<<13;lf_random^=lf_random>>17
 static int32_t lf_delay(const int16_t *buf,uint32_t size,uint32_t pos)
 {
     uint32_t k=(pos>>16)&(size-1),f=pos&65535u;
-    return buf[k]+(((int32_t)(buf[(k+1)&(size-1)]-buf[k])*(int32_t)f)>>16);
+    return buf[k]+(((int32_t)(buf[(k+1)&(size-1)]-buf[k])*(int32_t)(f>>1))>>15);
 }
 static int32_t lf_pitch_offset(int32_t d,uint32_t root); /* seq.c: selected scale */
 static void lf_master_fx(int32_t *l,int32_t *r,uint32_t n)
 {
     uint32_t i,c,j;int32_t gm,amount;
-    for(i=0;i<LF_COUNT;i++) lf_smooth[i]+=(int32_t)(lf[i]*256-lf_smooth[i])/8;
+    for(i=0;i<LF_LEVEL;i++) lf_smooth[i]+=(int32_t)(lf[i]*256-lf_smooth[i])/8;
     gm=lf_smooth[LF_GMIX]>>8;amount=lf_smooth[LF_AMOUNT]>>8;
     for(i=0;i<n;i++) {
         int32_t x[2]={l[i],r[i]},wet[2]={0,0};

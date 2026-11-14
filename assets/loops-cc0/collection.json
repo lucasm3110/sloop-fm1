@@ -1,0 +1,83 @@
+{
+  "name": "Park in D",
+  "sounds": [
+    {
+      "name": "Birds",
+      "file": "prepared/birds.wav",
+      "type": "texture",
+      "start": 0,
+      "seconds": 3
+    },
+    {
+      "name": "River",
+      "file": "prepared/river.wav",
+      "type": "texture",
+      "start": 0,
+      "seconds": 3
+    },
+    {
+      "name": "Wind",
+      "file": "prepared/wind.wav",
+      "type": "texture",
+      "start": 0,
+      "seconds": 3
+    },
+    {
+      "name": "Birdsong",
+      "file": "prepared/birdsong.wav",
+      "type": "texture",
+      "start": 0,
+      "seconds": 3
+    },
+    {
+      "name": "Stream",
+      "file": "prepared/stream.wav",
+      "type": "texture",
+      "start": 0,
+      "seconds": 3
+    },
+    {
+      "name": "Park air",
+      "file": "prepared/park-air.wav",
+      "type": "texture",
+      "start": 0,
+      "seconds": 3
+    },
+    {
+      "name": "Warm pad",
+      "file": "prepared/warm-pad.wav",
+      "type": "tonal",
+      "root": "D",
+      "start": 2,
+      "seconds": 3,
+      "follow_key": true
+    },
+    {
+      "name": "Glass pad",
+      "file": "prepared/glass-pad.wav",
+      "type": "tonal",
+      "root": "D",
+      "start": 2,
+      "seconds": 3,
+      "follow_key": true
+    },
+    {
+      "name": "Sine pad",
+      "file": "prepared/sine-pad.wav",
+      "type": "tonal",
+      "root": "D",
+      "start": 2,
+      "seconds": 3,
+      "follow_key": true
+    },
+    {
+      "name": "Soft beat",
+      "file": "prepared/soft-beat.wav",
+      "type": "rhythmic",
+      "bpm": 72,
+      "bars": 1,
+      "seconds": 3.3333333333333335,
+      "follow_bpm": true
+    }
+  ]
+}

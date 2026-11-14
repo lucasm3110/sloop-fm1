@@ -11531,6 +11531,121 @@ $("connect").addEventListener("click", () => {
   if (dev) { wantConnected = false; disconnect(); } else connect();
 });
 applyLang();
+/* Lucas FM loop collections: share SLOOP's decoder, IMA encoder and MIDI upload. */
+const LFP = { format: 'lucas-fm-loops', version: 1, slots: [], entries: [], name: 'My collection' };
+let lfDraft = [];
+function lfPackValidate(p) {
+  if (!p || p.format !== 'lucas-fm-loops' || p.version !== 1 || !Array.isArray(p.slots) || p.slots.length > 4) throw new Error('Not a Lucas FM loop collection');
+  const used = new Set(), ids = new Set();
+  for (const slot of p.slots) {
+    const d = b64dec(slot.data), v = new DataView(d.buffer, d.byteOffset, d.byteLength);
+    if (!Number.isInteger(slot.slot) || slot.slot < 0 || slot.slot > 3 || used.has(slot.slot) || d.length < 640 || d.length > SMP.SLOT_SIZE || d.length !== slot.bytes || crc32(d) !== slot.crc) throw new Error('Damaged or duplicate sample slot');
+    used.add(slot.slot);
+    if (v.getUint32(0,true)!==0x504D5346 || v.getUint16(4,true)!==1 || d[6]<1 || d[6]>4 || v.getUint32(24,true)!==0x314C464C || v.getUint32(16,true)!==d.length-512 || v.getUint32(20,true)!==crc32(d.subarray(512))) throw new Error('Invalid sample header');
+    for(let j=0;j<d[6];j++) {
+      const m=512+j*24,b=32+j*28,id=d[m+15],off=v.getUint32(b,true),n=v.getUint32(b+4,true),ls=v.getUint32(b+8,true),le=v.getUint32(b+12,true),rate=v.getUint32(b+16,true);
+      if(id>=10 || ids.has(id) || d[m+12]>2 || (d[m+13]>11 && d[m+13]!==255) || d[m+14]>3 || v.getUint16(m+16,true)>300 || v.getUint16(m+18,true)>16 || off<128 || off+Math.ceil(n/2)>d.length-512 || ls>le || le>=n || !rate || rate>65536 || d[b+24]>88 || !d[b+27]) throw new Error('Invalid loop metadata or boundaries');
+      ids.add(id);
+    }
+  }
+  return p;
+}
+function lfPackBuild() {
+  if (!lfDraft.length || lfDraft.length>10) throw new Error('Choose one to ten sounds');
+  const entries=lfDraft.map((e,id)=> {
+    if(!Number.isFinite(e.start) || !Number.isFinite(e.seconds) || !Number.isInteger(e.bpm) || e.bpm<0 || e.bpm>300 || !Number.isInteger(e.bars) || e.bars<0 || e.bars>16)throw new Error('Use valid trim times, whole BPM and bars');
+    const start=Math.round(e.start*SMP.RATE),end=Math.min(e.x.length,Math.round((e.start+e.seconds)*SMP.RATE));
+    if(start<0 || end-start<SMP.RATE*.1) throw new Error('Each trim needs at least 0.1 seconds');
+    let s=e.x.slice(start,end),pk=0;for(const x of s) pk=Math.max(pk,Math.abs(x));
+    if(!pk)throw new Error('Silent sound');
+    const fade=Math.min(Math.round(.015*SMP.RATE),Math.floor(s.length/8));
+    s=Int16Array.from(s,(x,i)=>Math.round(x*16384/pk*Math.min(1,i/fade,(s.length-1-i)/fade)));
+    const kind=['texture','tonal','rhythmic'].indexOf(e.kind),root=e.root===''?255:Number(e.root);
+    if(e.followKey && root===255)throw new Error('Follow Key needs the declared root of this recording');
+    if(e.followBpm && !(e.bpm>=30 && e.bpm<=300))throw new Error('Follow BPM needs source BPM');
+    if(kind===2 && (!e.bars || Math.abs(s.length/SMP.RATE-e.bars*240/e.bpm)>.05))throw new Error('Rhythmic trim must contain the declared whole bars');
+    const encoded=imaEncode(s,0);
+    return {...e,id,kind,root,flags:(e.followKey?1:0)|(e.followBpm?2:0),s,data:encoded.data};
+  });
+  const banks=[[],[],[],[]],sizes=[128,128,128,128];
+  for(const e of [...entries].sort((a,b)=>b.data.length-a.data.length)) {
+    const available=[0,1,2,3].filter(k=>banks[k].length<4 && sizes[k]+e.data.length<=SMP.SLOT_SIZE-512).sort((a,b)=>sizes[a]-sizes[b]);
+    if(!available.length)throw new Error('Collection exceeds four 80 KiB slots. Shorten the trims.');
+    const k=available[0];banks[k].push(e);sizes[k]+=e.data.length;
+  }
+  const slots=banks.flatMap((bank,k)=> {
+    if(!bank.length)return [];
+    const d=new Uint8Array(512+sizes[k]),v=new DataView(d.buffer);let off=128;
+    v.setUint32(0,0x504D5346,true);v.setUint16(4,1,true);d[6]=bank.length;v.setUint32(24,0x314C464C,true);
+    d.set(new TextEncoder().encode('LUCASFM'),8);
+    bank.forEach((e,j)=> {
+      const b=32+j*28,m=512+j*24;
+      [off,e.s.length,0,e.s.length-1,32768].forEach((x,i)=>v.setUint32(b+4*i,x,true));
+      v.setInt16(b+20,(60+(e.root<12?e.root:0))*16,true);d[b+25]=d[b+26]=60+e.id;d[b+27]=1;
+      d.set(new TextEncoder().encode(e.name.replace(/[^\x20-\x7e]/g,'?').slice(0,11)),m);
+      d[m+12]=e.kind;d[m+13]=e.root;d[m+14]=e.flags;d[m+15]=e.id;v.setUint16(m+16,e.bpm||0,true);v.setUint16(m+18,e.bars||0,true);
+      d.set(e.data,512+off);off+=e.data.length;
+    });
+    v.setUint32(16,off,true);v.setUint32(20,crc32(d.subarray(512)),true);
+    return [{slot:k,bytes:d.length,crc:crc32(d),data:b64enc(d)}];
+  });
+  return lfPackValidate({format:LFP.format,version:1,name:'My collection',entries:entries.map(({x,s,data,...e})=>e),slots});
+}
+function lfPackSummary(p) {
+  const names=[];
+  for(const s of p.slots) {const d=b64dec(s.data),v=new DataView(d.buffer);for(let j=0;j<d[6];j++) {
+    const m=512+j*24,name=new TextDecoder().decode(d.subarray(m,m+12)).replace(/\0.*$/,'');
+    names.push(`${String(d[m+15]+1).padStart(2,'0')}. ${name} · ${['texture','tonal','rhythmic'][d[m+12]]} · ${d[m+13]<12?['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'][d[m+13]]:'natural pitch'} · ${v.getUint16(m+16,true)||'free'} BPM`);
+  }}
+  $('lf-summary').textContent=names.sort().join('\n')+'\n\n'+p.slots.map(s=>`USR${s.slot+1}: ${(s.bytes/1024).toFixed(1)} / 80 KiB`).join(' · ')+'\nFour simultaneous layers. Loop slots share storage with sample instruments and user drum kits.';
+}
+function lfInvalidate() {lfReady=null;$('lf-summary').textContent='Changed: prepare this collection again before saving or transferring.';}
+function lfRows() {
+  lfInvalidate();
+  const box=$('lf-rows');box.replaceChildren();
+  lfDraft.forEach((e,i)=> {
+    const row=el('fieldset',{},el('legend',{text:`${i+1}. ${e.name}`}));
+    const input=(label,key,type='number')=> {const n=el('input',{type,value:e[key],step:type==='number'?'0.01':undefined});n.addEventListener('change',()=>{e[key]=type==='number'?Number(n.value):n.value;lfInvalidate();});row.append(el('label',{},label+' ',n));};
+    input('Name','name','text');input('Start (seconds)','start');input('Length (seconds)','seconds');
+    const kind=el('select',{});['texture','tonal','rhythmic'].forEach(k=>kind.append(el('option',{value:k,text:k})));kind.value=e.kind;
+    kind.addEventListener('change',()=>{e.kind=kind.value;e.followKey=e.kind==='tonal';e.followBpm=e.kind==='rhythmic';lfRows();});row.append(el('label',{},'Type ',kind));
+    const root=el('select',{});['Unknown','C','C#','D','D#','E','F','F#','G','G#','A','A#','B'].forEach((n,k)=>root.append(el('option',{value:k?k-1:'',text:n})));root.value=e.root;root.onchange=()=>{e.root=root.value;lfInvalidate();};
+    row.append(el('label',{},'Declared root ',root));input('Source BPM','bpm');input('Bars','bars');
+    for(const [key,label] of [['followKey','Follow Key'],['followBpm','Follow BPM']]) {const n=el('input',{type:'checkbox'});n.checked=e[key];n.disabled=e.kind==='texture';n.onchange=()=>{e[key]=n.checked;lfInvalidate();};row.append(el('label',{},n,label));}
+    row.append(el('button',{type:'button',onclick:()=>{lfDraft.splice(i,1);lfRows();}},'Remove'));box.append(row);
+  });
+}
+const lfPanel=el('details',{id:'lf-collection'},el('summary',{text:'Lucas FM · Imported loop collection'}));
+lfPanel.append(el('p',{text:'Add up to ten recordings. Trim and normalize them here, then review storage before transfer. Follow Key / BPM plays only when the prepared recording matches the song. Prepare different keys and tempos with tools/lucas_pack.py; this browser importer keeps original pitch and tempo.'}));
+const lfFiles=el('input',{type:'file',multiple:true,accept:'audio/*'});
+lfFiles.onchange=async()=>{try {for(const f of lfFiles.files) {if(lfDraft.length>=10)throw new Error('Ten entries maximum');const d=await decodeFile(f);lfDraft.push({name:f.name.replace(/\.[^.]+$/,'').slice(0,11),x:d.x||d.s,start:0,seconds:Math.min(3,(d.x||d.s).length/SMP.RATE),kind:'texture',root:'',bpm:0,bars:0,followKey:false,followBpm:false});}lfRows();}catch(e){report(e);}};
+lfPanel.append(el('label',{},'Add recordings ',lfFiles),el('div',{id:'lf-rows'}));
+let lfReady=null;
+lfPanel.append(el('button',{type:'button',onclick:()=>{try{lfReady=lfPackBuild();lfPackSummary(lfReady);}catch(e){report(e);}}},'Prepare collection'));
+const lfImport=el('input',{type:'file',accept:'.lucaspack,.json'});lfImport.onchange=async()=>{try{lfReady=lfPackValidate(JSON.parse(await lfImport.files[0].text()));lfPackSummary(lfReady);}catch(e){lfReady=null;report(e);}};
+lfPanel.append(el('label',{},'Open prepared collection ',lfImport),el('pre',{id:'lf-summary',style:'white-space:pre-wrap'}));
+lfPanel.append(el('button',{type:'button',onclick:()=>{if(lfReady)download('lucas-collection.lucaspack',lfReady);}},'Save collection backup'));
+lfPanel.append(el('button',{type:'button',onclick:async()=> {
+  if(!lfReady || !dev)return report(new Error('Prepare a collection and connect Lucas FM first'));
+  if(!String(dev.info.version).includes('LUCAS'))return report(new Error('This collection needs Lucas FM firmware'));
+  if(smpBusy || busy)return;
+  if(!confirm('Replace the user sample slots with this collection? Back up existing samples and kits first. Stop playback before transfer.'))return;
+  smpBusy=true;busy++;
+  try {
+    lfPackValidate(lfReady);
+    // All four slots form one collection; clear unused slots to avoid stale duplicate ids.
+    for(let k=0;k<4;k++) {
+      const s=lfReady.slots.find(s=>s.slot===k);
+      if(!s) {const r=parse[CMD.SMP_ERASE](await rq(req.smpErase(k),{timeout:3000,retries:0}));if(r.rc)throw new Error(`Erase USR${k+1}: ${r.rc}`);continue;}
+      const d=b64dec(s.data);let r=parse[CMD.SMP_BEGIN](await rq(req.smpBegin(k),{timeout:3000,retries:0}));if(r.rc)throw new Error(`Begin USR${k+1}: ${r.rc}`);
+      for(let off=512;off<d.length;off+=256) {r=parse[CMD.SMP_WRITE](await rq(req.smpWrite(k,off,d.subarray(off,off+256)),{timeout:2000,retries:1}));if(r.rc)throw new Error(`Write USR${k+1}: ${r.rc}`);}
+      r=parse[CMD.SMP_END](await rq(req.smpEnd(k,d.subarray(0,SMP.HDR_LEN)),{timeout:4000,retries:0}));if(r.rc)throw new Error(`Commit USR${k+1}: ${r.rc}`);
+    }
+    await smpInfo();renderSamples();sayK('ready',' · Loop collection transferred. Press LFO.');
+  }catch(e){report(e);}finally{busy--;smpBusy=false;}
+}},'Transfer collection'));
+$('p-samples').prepend(lfPanel);
+
 showTab(tab);
 libInit();
 if (!MOCK && !navigator.requestMIDIAccess) sayK("nomidi");

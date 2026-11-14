@@ -42,10 +42,18 @@ jobs:
             build/source-commit.txt
             build/firmware.sha256
             build/ATTRIBUTION.txt
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Lucas integration tests
+        run: sh tests/run_lucas.sh > build/lucas-tests.txt 2>&1
       - name: Upstream tests
+        if: always()
         run: sh tests/run_tests.sh > build/test-results.txt 2>&1
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: tests-${{ github.sha }}
-          path: build/test-results.txt
+          path: |
+            build/test-results.txt
+            build/lucas-tests.txt
