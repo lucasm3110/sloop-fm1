@@ -78,6 +78,9 @@ static void controls(void) {
     tap(B_HOME);for(unsigned k=0;k<4;k++) {v=k==3?song.g[G_DRLVL]:trk[k].p[P_LEVEL];turn(EN_K1+k,-1);assert((k==3?song.g[G_DRLVL]:trk[k].p[P_LEVEL])==v-1);}
     turn(EN_SELECT,8);assert(lf_home_loops && song.sel==1);tap(B_EDIT);assert(lf_page==LF_LOOPS);
     turn(EN_PRESET,1);assert(lf_pick==4);turn(EN_SELECT,2);assert(lf_pick==6);
+    {lf_meta_t old=lf_library[lf_pick].meta;lf_library[lf_pick].meta.root=255;lf_library[lf_pick].meta.bpm=72;
+        lf[LF_FLAGS+lf_pick]=0;turn(EN_ALGO,1);assert(lf[LF_FLAGS+lf_pick]==2);
+        turn(EN_ALGO,-1);assert(lf[LF_FLAGS+lf_pick]==0);lf_library[lf_pick].meta=old;}
     tap(B_HOME);assert(lf_page==LF_HOME);tap(B_ENV);assert(lf_page==LF_ENV);
     v=TSEL->p[P_SUS];turn(EN_K3,-1);assert(TSEL->p[P_SUS]==v-1);
     tap(B_LFO);assert(lf_page==LF_LFO);turn(EN_ALGO,2);assert(TSEL->p[P_LWAVE]==2);turn(EN_K2,12);assert(TSEL->p[P_LD_PIT]==12);

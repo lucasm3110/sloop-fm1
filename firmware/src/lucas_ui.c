@@ -157,9 +157,12 @@ UI_SMALL static int lf_ui_input(uint32_t pressed)
         else if(lf_page==LF_ARP) {lf_release(1u<<song.sel);lf_pedit(P_AMODE,s);}
         else if(lf_page==LF_LOOPS) {
             const lf_meta_t *m=&lf_library[lf_pick].meta;
-            uint32_t flags=(uint32_t)clamp(lf[LF_FLAGS+lf_pick]+s,0,3);
-            if(((flags&1) && m->root>=12) || ((flags&2) && !m->bpm)) ui_message("PACK NEEDS METADATA");
-            else lf[LF_FLAGS+lf_pick]=(uint8_t)flags;
+            uint32_t allowed=(m->root<12?1u:0u)|(m->bpm?2u:0u);
+            int32_t dir=s>0?1:-1,flags;
+            /* Skip unavailable modes: a BPM-only clip must not get stuck at KEY. */
+            for(flags=lf[LF_FLAGS+lf_pick]+dir;flags>=0 && flags<=3;flags+=dir)
+                if(((uint32_t)flags&allowed)==(uint32_t)flags) {lf[LF_FLAGS+lf_pick]=(uint8_t)flags;break;}
+            if(!allowed)ui_message("TEXTURE: FREE PLAY");
         } else if(lf_page!=LF_SAVE && !lf_home_loops) {
             lf_release(1u<<song.sel);
             if(is_drum(TSEL))lf_pedit(P_E0,s);
