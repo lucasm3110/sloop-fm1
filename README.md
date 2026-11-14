@@ -2,16 +2,17 @@
 
 Lucas FM development is on **codex/lucas-fm**. This is a separate project from TeleNeuMu and Geara.
 
-- [Compiled custom firmware](dist/lucas-fm-0.2.fwsc) · [source commit](dist/source-commit.txt) · [SHA-256](dist/SHA256SUMS)
+- [Complete 0.3 download](dist/Lucas-FM-0.3.zip)
+- [Compiled custom firmware](dist/lucas-fm-0.3.fwsc) · [source commit](dist/source-commit.txt) · [SHA-256](dist/SHA256SUMS)
 - [Controls, loops, effects and saving](docs/lucas/GUIDE.md)
 - [Build and emulator instructions](docs/lucas/DEVELOPMENT.md)
-- [0.2 navigation, effects, preloaded sounds and tests](docs/lucas/0.2.md)
-- [Actual firmware screenshots](docs/lucas/screenshots/0.2/overview.png)
+- [0.3 redesign, controls and validation](docs/lucas/0.3.md)
+- [Actual firmware screenshots](docs/lucas/screenshots/0.3/overview.png)
 - [Ten-sound CC0 starter collection](assets/loops-cc0/park-in-d.lucaspack)
 
 Validated in the native emulator; **physical hardware has not been flashed or tested**. The play-ready package boots with ten imported sounds and an editable drum beat. Four imported layers can play at once. Key/tempo variants are prepared offline. Full-load timing requires the device's nominal 240 MHz; the requested 100 MHz emulator stress case overloads. Personal Desktop audio stays in the ignored `private/` folder.
 
-The upstream README and its credits follow.
+The upstream README and its credits follow as historical reference. Its control map describes SLOOP; use the Lucas guide above for this firmware.
 
 ---
 

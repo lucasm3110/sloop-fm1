@@ -1,20 +1,22 @@
-Lucas FM 0.2 for M-VAVE FM-1
+Lucas FM 0.3 for M-VAVE FM-1
 
-Open lucas-fm-0.2.fwsc with Open .fwsc in https://joakimeriksson.github.io/fm1-emu/ and choose 240 MHz. Ten public imported sounds, factory instruments/kits and an editable starter beat are already present. Press PLAY for drums; LFO opens loops.
+Open lucas-fm-0.3.fwsc with Open .fwsc in https://joakimeriksson.github.io/fm1-emu/ and choose 240 MHz. Ten public imports, factory instruments/kits and an editable starter beat are included. Press PLAY for the drum machine.
 
-ALGORITHM selects the part. PRESETS browses sounds. EDIT opens Sound; SELECT there chooses the engine. HOME always returns. FX opens effects, SELECT chooses an effect, EDIT toggles bypass, and the four knobs follow the screen labels.
+SELECT selects the part. PRESETS browses sounds. ALGORITHM chooses the engine. On Home, the four knobs are the four part levels. EDIT opens Sound and then its engine controls. SCL opens key, scale, tempo and chord/piano playing. ENV, LFO and ARP open those named functions. FX: ALGORITHM chooses processor, PRESETS loads settings, EDIT bypasses/restores. HOME always returns.
 
-On the development Mac: Launch Lucas FM.command uses your ignored private 0.2 package when available, including your personal drum kit. Personal audio is not in this public bundle.
+For loops: HOME, SELECT past Drums to LOOPS, EDIT. SELECT a clip, EDIT to play/stop. Four knobs mix four visible clips; PRESETS changes banks. ALGORITHM sets prepared-key/BPM matching. This is not real-time pitch shifting or stretching.
 
-Native emulator: fm1-live --fwsc lucas-fm-0.2.fwsc --midi none --mhz 240
+On the development Mac, Launch Lucas FM.command uses the local personal 0.3 package and kit when available. Personal audio is excluded from this public archive.
 
-lucas-fm-0.2-update.fwsc is the firmware-only package. The physical updater preserves samples and does not install the preloaded collection. Transfer the .lucaspack separately with the editor on hardware. No physical device has been flashed or tested.
+Native emulator: fm1-live --fwsc lucas-fm-0.3.fwsc --midi none --mhz 240
 
-GUIDE.md explains controls. 0.2.md records current validation and limits. VALIDATION.md is historical 0.1 evidence. DEVELOPMENT.md explains builds. source-commit.txt and SHA256SUMS identify this firmware.
+lucas-fm-0.3-update.fwsc is firmware-only. Physical updates preserve samples; transfer the collection separately with the editor. No physical device has been flashed or tested.
 
-Limits: four concurrent imports, eight shared pitched voices, offline pitch/tempo preparation. Heavy VOICE presets can pause shared effects; 100 MHz full workloads overload. Full upstream CI retains known static instruction-budget failures; see the report.
+GUIDE.md is the full control map. 0.3.md records validation and limits. DEVELOPMENT.md explains builds. source-commit.txt and SHA256SUMS identify the firmware. Earlier release reports are historical.
+
+Limits: four simultaneous imports, eight shared pitched voices, offline pitch/tempo preparation. Heavy engines can visibly pause shared effects or shed voices. Full 100 MHz workloads overload. Known static instruction-budget failures remain documented.
 
 Complete corresponding source and licenses:
-https://github.com/lucasm3110/sloop-fm1/tree/0bce425064ef00b5b3bc711c6b4f14a0d47970d9
-Documentation and companion tools:
+https://github.com/lucasm3110/sloop-fm1/tree/0358b64dc0cb663632e6f008532ea14e0e1fd995
+Documentation and tools:
 https://github.com/lucasm3110/sloop-fm1/tree/codex/lucas-fm

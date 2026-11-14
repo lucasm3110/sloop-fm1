@@ -1,0 +1,1 @@
+PASS: 4 slots: 480-byte FSMP headers and all metadata/audio transferred byte-for-byte through compiled firmware (32 unused padding bytes excluded), 961 USB commands, 78310 emulated ms

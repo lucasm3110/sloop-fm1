@@ -54,3 +54,9 @@ _,mem=run('arp-controls','3000:ARP,3180:ARP^,3300:e1:+1,5000:C4,8500:C4^')
 assert mem('lf_page')==bytes([10])
 assert struct.unpack_from('<h',mem('trk'),17*2)[0]==1 # P_AMODE
 print('PASS: physical LFO/ARP buttons and ALGORITHM operate actual sound parameters')
+# A BPM-only clip can move both ways through its valid choices with single detents.
+for name,extra,flags in [('free','',0),('bpm',',4300:e1:+1',2)]:
+    _,mem=run('match-'+name,'2200:HOME,2380:HOME^,2500:e0:+4,3000:EDIT,3180:EDIT^,3300:e0:+9,3800:e1:-1'+extra+note)
+    assert mem('lf_pick')==bytes([9])
+    assert mem('lf')[33+9]==flags,('BPM-only matching navigation',name)
+print('PASS: BPM-only clip skips unavailable KEY matching in both directions')

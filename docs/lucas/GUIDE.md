@@ -6,41 +6,53 @@ A separate GPL-3.0 firmware fork of SLOOP for the M-VAVE FM-1. This repository i
 
 On this Mac, double-click `Launch Lucas FM.command` in the LucasFM folder. It opens the real native emulator with your local ten-sound collection and USR1 personal drum kit already installed. It does not connect to physical MIDI devices. `Open Lucas Editor.command` opens the companion editor in Chrome on localhost. Closing its Terminal window stops the local web server.
 
-For another computer, use the source/build instructions or open `dist/lucas-fm-0.2.fwsc` in the hosted emulator's **Open .fwsc…** control. This package already contains the ten public imports. Choose **240 MHz**. The ZIP also includes the transferable `.lucaspack` for the companion editor. On physical hardware, the retained update loader preserves sample slots; transfer the collection separately through the editor.
+For another computer, use the source/build instructions or open `dist/lucas-fm-0.3.fwsc` in the hosted emulator's **Open .fwsc…** control. This package already contains the ten public imports. Choose **240 MHz**. The ZIP also includes the transferable `.lucaspack` for the companion editor. On physical hardware, the retained update loader preserves sample slots; transfer the collection separately through the editor.
 
 The initial song is D major, 72 BPM, with Warm Pad, Sub Bass, Rhodes and an editable 808 beat. Press PLAY to hear the drum machine immediately; existing autosaves retain their own patterns. The first three tracks share eight pitched voices; the fourth uses SLOOP's separate drum engine. These are starting sounds: choose any retained synth engine/preset on tracks 1–3. Track 4 remains the dedicated drum track.
 
-Press ARP to open PLAY. Consecutive white keys walk the selected scale; the fifth white key from the left (physical C4) is degree 1, the next is degree 2, and so on, with lower and higher octaves on either side. In D major the seven triads are D, Em, F# minor, G, A, Bm and C# diminished. The wheel shows the root, quality and chord tones. Black keys are silent in the everyday number/chord modes. The deeper SLOOP interface retains its optional chord modifiers.
+Press **SCL** for the scale and playing guide. Its four knobs choose key, scale, BPM and PIANO / NOTES / CHORD. In D major, the seven triads are D, Em, F# minor, G, A, Bm and C# diminished. White keys follow scale degrees in NOTES/CHORD; PIANO keeps all chromatic notes playable. EDIT on this page toggles Hold; changing part, key, mode or octave releases live held notes. Live key changes do not transpose already-recorded sequence notes.
 
-K4 chooses PIANO, NUM (single scale notes) or CHORD (diatonic triads). PIANO preserves chromatic playing, including out-of-scale notes; the screen and single-color key lights guide the scale. ARP again toggles chord hold. A new chord replaces the held chord; toggling hold off releases it. Changing track, key, mode or octave releases the affected live notes. Key changes affect live mapping and matching of prepared loops; they do not transpose recorded sequence notes.
+## Controls that match their names
 
-## Physical controls
+There are seven rotary encoders, no encoder pushes, one master potentiometer, 14 buttons and 27 note keys. The LCD is 240 × 240 and is not a touchscreen.
 
-There are seven rotary encoders, **no encoder pushes**, one master potentiometer, 14 buttons and 27 note keys. The LCD is 240 × 240 and is not a touchscreen.
-
-| Control | Function |
+| Printed control | Everyday behavior |
 |---|---|
-| HOME | Return directly to the performance overview, including from deeper SLOOP pages |
-| SELECT | Home: tempo. Sound: choose synth engine. Effects: choose effect. Loops: choose entry. |
-| ALGORITHM | Select Pad, Bass, Melody or Drums; selection follows between pages |
-| ARP | Open PLAY; on PLAY, toggle hold |
-| EDIT | Open SOUND directly, including from Home; on Effects toggle effect on/off; on Loops toggle selected sound; on Sequence undo/redo |
-| PRESETS | Home/Play/Mix: browse the whole sound library. Sound: browse within the selected engine. Drums: choose a kit. |
-| SCL / SEL | Key & Tempo; tap again to return Home |
-| SEQ | Sequence overview; tap again for the retained detailed note/drum editor |
-| LFO | Loop library; tap again for selected loop's metadata and Follow settings; again returns library |
-| GLO | Mixer for selected track |
-| ENV | Shape envelope for selected track |
-| FX | Effects; SELECT chooses section; FX flips the EQ or Grain page |
-| SAVE | SELECT chooses save section, load section or system/update; K1 chooses A–D; EDIT twice confirms save/load |
-| PLAY | Sequence start/stop; stopping also fades imported layers and releases held notes |
-| REC | Arm recording when stopped; toggle recording/overdub when running |
-| OCT− / OCT+ | Live octave; on Loops switch four-entry bank; on Effects flip page |
-| MASTER | Physical output volume |
+| SELECT | Select a part. On Home, turn beyond part 4 to select LOOPS, then press EDIT. In Loops select a clip; in Save select an action. |
+| PRESETS | Home: all factory/favorite/user sounds. Sound and shaping pages: presets in the current engine. Drums: kits. FX: effect presets or modulation/pitch variations. Loops: banks of four clips. Sequence: stored sections. Save: destination section. |
+| ALGORITHM | Choose the selected sound's engine; drums choose a kit. FX: processor. LFO: waveform. ARP: pattern, including OFF. Loops: FREE / KEY / BPM / K+B matching. |
+| KNOB 1–4 | Follow the four aligned screen cells. On Home they directly control Pad, Bass, Melody and Drums levels. |
+| MASTER | Overall physical output volume. |
 
-ALGORITHM selects the part, as in SLOOP; it does not change the synthesis engine. EDIT opens Sound, where SELECT changes the engine and PRESETS browses that engine. The engine name and control hints stay visible. HOME returns to the four sound cards. The four right-hand knobs always follow their visible footer. On Home and Key: root, scale, BPM, keyboard mode. On Play/Sound: track level, track filter/tone, reverb send, keyboard mode. “REVERB” is a send, not an undocumented macro. On Mix: level, pan, mute and solo. Turn mute/solo clockwise on, counterclockwise off. There is no required hold combination for everyday navigation. HOME is the universal way back.
+| Button | Destination or action |
+|---|---|
+| HOME | Always return to the four-part overview. |
+| EDIT | Home: open the selected sound or Loops. Sound: edit engine parameters; repeat for the second bank and back to the browser. On drums, open the retained drum editor. |
+| SCL | Scale, key, tempo and chord/piano guide. EDIT here toggles Hold. |
+| ENV | Actual attack, decay, sustain and release, with a responsive envelope drawing. |
+| LFO | Actual speed and pitch/filter/level modulation depths. ALGORITHM chooses the waveform. Zero depth means no modulation. |
+| ARP | Actual arpeggiator: ALGORITHM chooses OFF or a pattern; knobs set rate, octaves, gate and Hold. |
+| FX | Effects. ALGORITHM selects the processor, PRESETS loads settings/variations, EDIT bypasses/restores. FX again flips extra EQ/Grain controls. |
+| GLO | Mixer: selected part's level, pan, mute and solo. SELECT chooses the part. |
+| SEQ | Note/drum sequence overview. Repeat for the retained detailed editor; EDIT on the overview undoes/redoes. |
+| SAVE | Save/load sections or enter advanced system controls. SELECT chooses the action, PRESETS chooses A–D, EDIT twice confirms. Changing the destination cancels pending confirmation. |
+| PLAY | Sequence start/stop everywhere. Stopping also fades imported layers and releases held notes. |
+| REC | Arm recording when stopped; record/overdub while running. |
+| OCT− / OCT+ | Keyboard octave. On Loops, previous/next clip bank. |
 
-The `*` marks differences from the last **working-song autosave**, not merely from the current named section. Autosave waits for stopped transport, no active voices/layers, an idle panel, and the existing minimum write interval. A manually saved section can coexist with a pending working-song autosave. Manual save refuses active sounds; stop playback, turn hold off, stop free loops, and let releases finish. Named sections load only after confirmation. The deep editor retains erase/undo and the existing recovery path.
+Sound selection is immediate. Turning ALGORITHM changes the engine and loads its first sound, so PRESETS can browse from there. Sound's four knobs are Level, Tone, Reverb and Keys; on drums the fourth knob is Delay. Level and send readouts on Sound/Home/Mix use percentages. Engine-specific edits show the engine's own labels and units. ENV/LFO/ARP apply to pitched parts; when Drums is selected those pages clearly direct you to a synth part or SEQ instead of presenting inactive synth controls.
+
+The four colors stay attached to parts everywhere. Footer cells align with the four physical knobs. The amber dot means changes since the last working-song autosave. Muted parts dim; transport and record state remain visible. The retained advanced SLOOP editors keep their original deeper control mappings; HOME always returns to Lucas.
+
+## Loops in three actions
+
+1. HOME, turn SELECT to LOOPS, press EDIT.
+2. Turn SELECT to a clip; EDIT starts/stops it.
+3. Use the four knobs for the four visible clip levels; PRESETS changes banks.
+
+ALGORITHM chooses the matching rule: FREE preserves the imported audio, KEY requires a prepared matching key, BPM a prepared matching tempo, K+B both. Modes needing missing metadata are skipped. A mismatch is visibly marked; this does not regenerate audio on the device. Texture recordings normally stay FREE. Part selection persists across instrument pages; the chosen bank determines which clips are visible; leaving the screen does not stop it. The library holds ten imports with four simultaneous layers.
+
+Autosave waits for stopped transport, no active voices/layers and an idle panel. A named section save can coexist with pending working-song changes. Stop playback and Hold, stop free loops, and let releases finish before manual save. Sections load only after confirmation in Save; the sequence overview's PRESETS retains the existing live section-switching behavior. Audio collections and songs are separate backups.
 
 ## Sequence
 
@@ -58,11 +70,11 @@ The supplied public **Park in D** collection contains six CC0 field-recording ex
 | Public starter | Approximately 30 seconds total at mono 16 kHz / 4-bit IMA ADPCM |
 | Private desktop collection | Ten shorter loops in three slots, with USR1 reserved for a personal drum kit |
 
-LFO opens the library. SELECT chooses an entry, EDIT starts/stops it, and K1–K4 adjust the four visible entry levels. OCT changes banks. PLAY, STOP, WAIT and FADE identify state. A fifth concurrent request reports `4 LAYERS BUSY`; it does not steal a held synth voice. Textures loop at their natural pitch/speed. Rhythmic clips start/stop at the next transport bar when the sequencer is running; when stopped they start immediately. Transport stop fades all layers. Free layers can also be stopped individually without starting the transport.
+Home → Loops opens the library. SELECT chooses an entry, EDIT starts/stops it, and K1–K4 adjust the four visible entry levels. OCT changes banks. PLAY, STOP, WAIT and FADE identify state. A fifth concurrent request reports `4 LAYERS BUSY`; it does not steal a held synth voice. Textures loop at their natural pitch/speed. Rhythmic clips start/stop at the next transport bar when the sequencer is running; when stopped they start immediately. Transport stop fades all layers. Free layers can also be stopped individually without starting the transport.
 
-Tap LFO again for the selected sound's prepared key/BPM. K2 and K3 explicitly enable/disable Follow Key and Follow BPM. Missing metadata prevents enabling that option. **Follow is a match guard, not real-time pitch shifting or time stretching.** A mismatched prepared clip is refused or fades out after a song change. With Follow off, it plays the prepared recording unchanged.
+The clip's prepared key and BPM appear beside its name when present. ALGORITHM chooses FREE, KEY, BPM or K+B; missing metadata prevents enabling the corresponding match rule. **Follow is a match guard, not real-time pitch shifting or time stretching.** A mismatched prepared clip is refused or fades out after a song change. With Follow off, it plays the prepared recording unchanged.
 
-The **0.2 play-ready package includes all ten public loops** for a fresh browser/native emulator. The local personal package includes your collection and drum kit. The physical update loader deliberately preserves existing user sample slots: physical installations still need collection transfer through the editor; no physical device has been flashed.
+The **0.3 play-ready package includes all ten public loops** for a fresh browser/native emulator. The local personal package includes your collection and drum kit. The physical update loader deliberately preserves existing user sample slots: physical installations still need collection transfer through the editor; no physical device has been flashed.
 
 ## Prepare and back up sounds
 
@@ -86,8 +98,8 @@ Use the existing Song/Projects and device-backup functions for notes, settings a
 
 | Section | Scope and controls | Bypass |
 |---|---|---|
-| Shape | Selected engine's attack/decay/sustain/release; TONE on Play/Sound is the track filter | Envelope is the sound shape, not an insert effect |
-| EQ | Shared master; low cut, bass, mid, treble; page 2 high cut and bypass | Page 2 BYPASS = 1 |
+| Shape | Selected engine's attack/decay/sustain/release; TONE on Sound is the track filter | Envelope is the sound shape, not an insert effect |
+| EQ | Shared master; low cut, bass, mid, treble; page 2 high cut and bypass | EDIT, or page 2 ACTIVE = OFF |
 | Drive | Shared master; amount, tone, output | Amount = 0 |
 | Modulation | Shared master; PRESETS chooses chorus/vibrato/tremolo/phaser; amount, speed, depth, width | Amount = 0 |
 | Glitch / Grain | Shared master; mix, size, delay, scatter; page 2 density, timing randomness, feedback, width; PRESETS chooses Octaves / In Key / Free | Mix = 0 |
@@ -96,7 +108,7 @@ Use the existing Song/Projects and device-backup functions for notes, settings a
 
 Modulation width changes the wet modulation phase spread, preserving the dry source's stereo image. At zero width the effect still works and identical left/right inputs remain identical. The stereo effect is not made by polarity inversion. Grain is an original four-grain processor with a short bounded buffer, triangular windows and bounded feedback. Scatter zero means no randomized pitch. **In Key only takes audio from exactly one active tonal loop with a declared root**; it does not analyze arbitrary recordings or correct every note in a polyphonic pad. Multiple tonal loops or an unknown root provide no new In Key grain input. Octaves/Free process the master mix. Delay/reverb reuse the existing shared buses and limiter. Reverb size and decay are coupled by the retained engine; they are not independent controls.
 
-EQ activates when any EQ parameter is edited. The screen explicitly shows ACTIVE or BYPASSED; EDIT toggles the selected effect (Shape is an envelope, so EDIT opens Sound there). FX flips the extra EQ/Grain page. Grain MIX is now a dry/wet crossfade with compensated grain level, making the effect obvious as MIX rises. Parameter changes retry processing after a CPU pause. Large effect changes are smoothed where relevant. If two audio buffers exceed about 85% load, the new shared EQ, Drive, Modulation and Grain processors yield first. Their last contribution fades to dry over 64 samples, preserving held notes. A persistent `NEW FX PAUSED: CPU` message appears; press FX to retry after reducing the load. Existing delay/reverb buses and the limiter remain. After that first reduction, the last-resort threshold uses 92% of the audio deadline, including USB service time. If the retained engine alone still overloads, its last-resort voice shedding remains and the screen reports `VOICE LIMIT: CPU`. The 100 MHz emulator setting cannot sustain the maximum tested load. See VALIDATION.md for measurements at both 100 and the device's nominal 240 MHz.
+EQ activates when any EQ parameter is edited. The screen explicitly shows ACTIVE or BYPASSED; EDIT toggles the selected effect. ENV opens the separate envelope page. FX flips the extra EQ/Grain page. Grain MIX is now a dry/wet crossfade with compensated grain level, making the effect obvious as MIX rises. Parameter changes retry processing after a CPU pause. Large effect changes are smoothed where relevant. If two audio buffers exceed about 85% load, the new shared EQ, Drive, Modulation and Grain processors yield first. Their last contribution fades to dry over 64 samples, preserving held notes. A persistent `NEW FX PAUSED: CPU` message appears; press FX to retry after reducing the load. Existing delay/reverb buses and the limiter remain. After that first reduction, the last-resort threshold uses 92% of the audio deadline, including USB service time. If the retained engine alone still overloads, its last-resort voice shedding remains and the screen reports `VOICE LIMIT: CPU`. The 100 MHz emulator setting cannot sustain the maximum tested load. See 0.3.md for current measurements and VALIDATION.md for historical measurements at both 100 and the device's nominal 240 MHz.
 
 ## Connections and updates
 

@@ -1,0 +1,8 @@
+{
+  "data_bss_bytes": 82620,
+  "data_bss_limit": 98304,
+  "pool_bytes": 328396,
+  "pool_limit": 344064,
+  "lowram_bytes": 22772,
+  "app_bytes": 575652
+}

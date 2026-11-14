@@ -1,0 +1,39 @@
+{
+  "data_bss_bytes": 82620,
+  "data_bss_limit": 98304,
+  "pool_bytes": 328396,
+  "pool_limit": 344064,
+  "lowram_bytes": 22772,
+  "app_bytes": 575652,
+  "audio": {
+    "magic": 1145194289,
+    "halves": 5597,
+    "max_us": 5037,
+    "nested": 137884,
+    "in_audio": 1,
+    "late": 0,
+    "timer_irqs": 324779,
+    "ui_frames": 1507,
+    "last_us": 4061,
+    "cpu_q8": 178,
+    "boots": 1,
+    "stage": 2,
+    "page": 37,
+    "home": 0,
+    "prev_stage": 0,
+    "prev_page": 0,
+    "prev_home": 0,
+    "prev_rst": 0,
+    "prev_frames": 0,
+    "last_cpu_percent": 69.53,
+    "buffer_deadline_us": 5804,
+    "shed_count": 0,
+    "fx_guard": 1,
+    "pitched_voices": [
+      4,
+      3,
+      0
+    ]
+  }
+}
+PASS: 7 heavy voices retained, four imports, original send buses and USB audio; new master FX yield visibly when necessary
