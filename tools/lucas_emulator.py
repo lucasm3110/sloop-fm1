@@ -76,5 +76,5 @@ if a.stress:
  ev.append((15000,'e0:+1'));ev.append((16000,'e2:+80'));ev.append((16000,'e4:+40'))
  ev.append((18000,'e0:+1'));ev.append((19000,'e2:+100'));tap(ev,21000,'FX');ev.append((22000,'e2:+80'));ev.append((22000,'e4:+100'))
  for i,n in enumerate([48,52,55,59,62,65,69,72]):ev.append((24000+i*40,f'm90{n:02x}64'))
- for t in range(24500,32000,250):ev.append((t,'m932464932a50932650'))
+ for t in range(24500,32000,250):ev.append((t,'m992464992a50992650'))
  for mhz in [100,240]:run('load-strict'+str(mhz),ev,33000,mhz,True,base,True)

@@ -85,8 +85,8 @@ UI_SMALL static int lf_ui_input(uint32_t pressed)
             else { lf_confirm=0; if(lf_save_action==0) project_save((uint32_t)song.g[G_SLOT]-1u);
                 else project_load((uint32_t)song.g[G_SLOT]-1u); }
         } else lf_open(LF_SOUND); break;
-    case B_ENV: lf_effect=0;lf_fxpage=0;lf_open(LF_EFFECTS);break;
-    case B_FX: if(lf_page==LF_EFFECTS) { lf_fxpage^=1; ui.force=1; } else lf_open(LF_EFFECTS);break;
+    case B_ENV: lf_cpu_guard=0;lf_effect=0;lf_fxpage=0;lf_open(LF_EFFECTS);break;
+    case B_FX: lf_cpu_guard=0;if(lf_page==LF_EFFECTS) { lf_fxpage^=1; ui.force=1; } else lf_open(LF_EFFECTS);break;
     case B_LFO: lf_open(lf_page==LF_LOOPS?LF_LOOPINFO:LF_LOOPS); break;
     case B_GLO: lf_open(LF_MIX); break;
     case B_ARP: if(lf_page==LF_PLAY) { lf_release(1u<<song.sel);TSEL->p[P_AHOLD]^=1; } else lf_open(LF_PLAY);break;
@@ -318,6 +318,7 @@ UI_SMALL static int lf_ui_draw(void)
             if(row<4) lf_text(12,12,action[row-1],lf_save_action==row-1?LF_COLOR[0]:LF_DIM);
             if(row==4) lf_text(8,8,"EDIT: CONFIRM / OPEN",LF_DIM);
         }
+        if(lf_cpu_guard && row==4) {cv_rect(0,0,240,40,LF_BG);lf_text(4,4,lf_cpu_guard==1?"NEW FX PAUSED: CPU":"VOICE LIMIT: CPU",LF_COLOR[3]);lf_text(4,23,"FX: RETRY / LESS LOAD",LF_DIM);}
         if(ui.msg_t && row==4) {cv_rect(0,0,240,40,LF_BG);lf_text(4,12,ui.msg,LF_TEXT);}
         for(k=0;k<240u*40u;k++) sig=(sig^cv_px[k])*16777619u;
         if(ui.force || sig!=lf_cache[row]) {lf_cache[row]=sig;cv_blit(0,row*40u);}

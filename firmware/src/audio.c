@@ -61,7 +61,12 @@ void fm1_alnk0_irq(void)                       /* via isr_alnk0 (hal/fm1_isr.S) 
         int32_t *o = &abuf[half * HALF_WORDS];
         if (shed_req) {
             shed_req = 0;
+#if LUCAS_FM
+            if(!lf_cpu_guard) lf_cpu_guard=1; /* shared new FX yield before held voices */
+            else {lf_cpu_guard=2;shed_voice();}
+#else
             shed_voice();
+#endif
         }
 #if FELUCCA_UAC
         uac_render_start();

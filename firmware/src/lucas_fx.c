@@ -8,6 +8,8 @@ static uint32_t lf_mw,lf_gw,lf_phase,lf_grain_clock,lf_random=0x4c464d31u;
 static int32_t lf_smooth[LF_COUNT],lf_eqstate[2][4],lf_drive_lp[2],lf_phaser[2][4];
 static int32_t lf_tonal[CTL];
 static uint8_t lf_grain_ref=255;
+static int32_t lf_fx_delta[2];
+static uint32_t lf_guard_fade=64;
 typedef struct {uint32_t pos,step,age,len;int32_t pan;} lf_grain_t;
 static lf_grain_t lf_grains[4];
 static uint32_t lf_rand(void) {lf_random^=lf_random<<13;lf_random^=lf_random>>17;lf_random^=lf_random<<5;return lf_random;}
@@ -19,12 +21,22 @@ static int32_t lf_delay(const int16_t *buf,uint32_t size,uint32_t pos)
 static int32_t lf_pitch_offset(int32_t d,uint32_t root); /* seq.c: selected scale */
 static void lf_master_fx(int32_t *l,int32_t *r,uint32_t n)
 {
-    uint32_t i,c,j;int32_t gm,amount;
+    uint32_t i,c,j;int32_t gm,amount,dl=l[n-1],dr=r[n-1];
+    /* Preserve held notes before the original overload fallback. Fade the last
+     * effect contribution to dry over 64 samples without paying for more DSP. */
+    if(lf_cpu_guard) {
+        for(i=0;i<n && lf_guard_fade;i++,lf_guard_fade--) {
+            l[i]+=lf_fx_delta[0]*(int32_t)lf_guard_fade/64;
+            r[i]+=lf_fx_delta[1]*(int32_t)lf_guard_fade/64;
+        }
+        return;
+    }
+    lf_guard_fade=64;
     for(i=0;i<LF_LEVEL;i++) lf_smooth[i]+=(int32_t)(lf[i]*256-lf_smooth[i])/8;
     gm=lf_smooth[LF_GMIX]>>8;amount=lf_smooth[LF_AMOUNT]>>8;
     if(!gm) {memset(lf_grains,0,sizeof lf_grains);lf_grain_clock=0;}
     /* Bypass must also release the CPU budget: no ring-buffer work while dry. */
-    if(!lf[LF_EQ] && lf_smooth[LF_DRIVE]<256 && !amount && !gm) return;
+    if(!lf[LF_EQ] && lf_smooth[LF_DRIVE]<256 && !amount && !gm) {lf_fx_delta[0]=lf_fx_delta[1]=0;return;}
     for(i=0;i<n;i++) {
         int32_t x[2]={l[i],r[i]},wet[2]={0,0};
         for(c=0;c<2;c++) {
@@ -93,4 +105,5 @@ static void lf_master_fx(int32_t *l,int32_t *r,uint32_t n)
         }
         l[i]=x[0]+wet[0]*gm/127;r[i]=x[1]+wet[1]*gm/127;
     }
+    lf_fx_delta[0]=l[n-1]-dl;lf_fx_delta[1]=r[n-1]-dr;
 }

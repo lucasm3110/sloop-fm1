@@ -62,6 +62,8 @@ static void effects(void) {
     }
     lf[LF_GMIX]=lf[LF_FEEDBACK]=lf[LF_SCATTER]=lf[LF_DENSITY]=127;
     for(j=0;j<20000;j++){for(i=0;i<CTL;i++)l[i]=r[i]=j<1000?(int32_t)osc_sine((j*CTL+i)*9739152u)/2:0;lf_master_fx(l,r,CTL);for(i=0;i<CTL;i++)assert(abs(l[i])<100000 && abs(r[i])<100000);}
+    lf_cpu_guard=1;for(j=0;j<4;j++){for(i=0;i<CTL;i++){l[i]=1234;r[i]=-3456;}lf_master_fx(l,r,CTL);}
+    for(i=0;i<CTL;i++)assert(l[i]==1234 && r[i]==-3456);lf_cpu_guard=0;
     assert(lf_pitch_offset(0,2)==0);puts("PASS: exact dry bypass, four modulation modes mono/wide, grain feedback/headroom bounded");
 }
 static void persistence(void) {
