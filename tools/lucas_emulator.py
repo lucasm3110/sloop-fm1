@@ -47,10 +47,10 @@ if a.screens:
  for name,button in [('home','HOME'),('key','SCL'),('mix','GLO'),('sequence','SEQ')]:
   ev=[];tap(ev,3000,button);cases[name]=ev
  ev=[];tap(ev,3000,'ARP');tap(ev,3800,'ARP');tap(ev,4600,'C4');cases['play']=ev
- ev=[];tap(ev,3000,'HOME');ev.append((3500,'e0:+1'));tap(ev,4500,'EDIT');cases['sound']=ev
+ ev=[];tap(ev,3000,'HOME');tap(ev,4500,'EDIT');cases['sound']=ev
  ev=[];tap(ev,3000,'LFO');tap(ev,3800,'EDIT');ev.append((4300,'e0:+1'));tap(ev,5000,'EDIT');ev.append((5500,'e0:+5'));tap(ev,6500,'EDIT');ev.append((7100,'e0:-6'));cases['loops']=ev
  ev=[];tap(ev,3000,'LFO');ev.append((3500,'e0:+6'));tap(ev,4500,'LFO');cases['loop-settings']=ev
- ev=[];tap(ev,3000,'FX');ev.append((3500,'e0:+4'));ev.append((4500,'e2:+65'));tap(ev,6000,'C4');cases['effects']=ev
+ ev=[];tap(ev,3000,'FX');ev.append((3500,'e0:+3'));ev.append((4500,'e2:+65'));tap(ev,6000,'C4');cases['effects']=ev
  for name,ev in cases.items():
   r,ram=run(name,ev,9000,flash=base)
   expected={'home':0,'play':1,'sound':2,'sequence':3,'loops':4,'mix':5,'key':6,'effects':7,'loop-settings':9}[name]
@@ -71,7 +71,7 @@ if a.stress:
  for i in range(4):
   if i:ev.append((3500+i*1200,'e0:+1'))
   tap(ev,4000+i*1200,'EDIT')
- tap(ev,9000,'FX');ev.append((9500,'e0:+1'));tap(ev,10500,'FX');ev.append((11000,'e5:-1'))
+ tap(ev,9000,'FX');tap(ev,10500,'FX');ev.append((11000,'e5:+1'))
  ev.append((12000,'e0:+1'));ev.append((13000,'e2:+80'))
  ev.append((15000,'e0:+1'));ev.append((16000,'e2:+80'));ev.append((16000,'e4:+40'))
  ev.append((18000,'e0:+1'));ev.append((19000,'e2:+100'));tap(ev,21000,'FX');ev.append((22000,'e2:+80'));ev.append((22000,'e4:+100'))

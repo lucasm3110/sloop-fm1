@@ -128,7 +128,10 @@ UI_SMALL static int lf_ui_input(uint32_t pressed)
         else lf_gedit(G_BPM,s);
     }
     if((s=panel_enc(EN_PRESET))) {
-        if(lf_page==LF_SOUND || lf_page==LF_HOME || lf_page==LF_PLAY || lf_page==LF_MIX) { uint32_t total,cur=preset_pos(&total); if(is_drum(TSEL)) lf_pedit(P_E0,s);
+        if(lf_page==LF_SOUND) {uint32_t n=ENGINES[TSEL->eng_req%NENGINES]->npresets;
+            if(is_drum(TSEL))lf_pedit(P_E0,s);
+            else if(n)apply_preset((uint32_t)(((int32_t)TSEL->preset+s%(int32_t)n+(int32_t)n)%(int32_t)n));}
+        else if(lf_page==LF_HOME || lf_page==LF_PLAY || lf_page==LF_MIX) { uint32_t total,cur=preset_pos(&total); if(is_drum(TSEL)) lf_pedit(P_E0,s);
             else if(total) preset_go((uint32_t)(((int32_t)cur+s%(int32_t)total+(int32_t)total)%(int32_t)total)); }
         else if(lf_page==LF_SEQUENCE) { uint32_t section=(uint32_t)clamp(song.g[G_SLOT]-1+s,0,3);song.g[G_SLOT]=(int16_t)(section+1);
             if(project_used(section)) section_load(section); else ui_message("EMPTY SECTION"); }
@@ -260,6 +263,7 @@ UI_SMALL static int lf_ui_draw(void)
             lf_text(7,0,"LUCAS FM",LF_COLOR[0]);
             lf_text(7,20,N_NOTE[trk[0].p[P_ROOT]%12],LF_TEXT);
             lf_text(31,20,N_SCALE[trk[0].p[P_SCALE]%NSCALES],LF_DIM);
+            lf_text(76,20,"PART",LF_DIM);lf_num(114,20,song.sel+1,LF_COLOR[song.sel]);
             cv_text(133,3,&FONT_L,bpm,LF_TEXT);lf_text(187,16,"BPM",LF_DIM);
             if(song.playing)cv_rect(230,4,6,6,LF_COLOR[1]);
             if(song.rec || rec_wait)cv_rect(230,16,6,6,LF_COLOR[3]);
@@ -318,12 +322,13 @@ UI_SMALL static int lf_ui_draw(void)
                     cv_rect(4+k*8,4,6,30,c);}
             }
         } else if(lf_page==LF_SOUND) {
-            uint32_t total,at=preset_pos(&total),index;int32_t pos=(int32_t)at+(int32_t)row-2;
-            char name[20];uint32_t en;
+            const engine_t *engine=ENGINES[TSEL->eng_req%NENGINES];
+            int32_t pos=(int32_t)TSEL->preset+(int32_t)row-2;char name[20];
             if(row==4) {lf_text(4,0,"ALGO PART / PRE SOUND",LF_DIM);lf_text(4,19,is_drum(TSEL)?"SEQ: DRUM MACHINE":"SELECT: ENGINE",LF_DIM);}
             else {
             if(is_drum(TSEL)) {pos=TDRUM->p[P_E0]+(int)row-2;if(pos<0 || pos>=DRUM_KITS) continue;str_cpy(name,DRUM_KIT_NAMES[pos],sizeof name);}
-            else {if(pos<0 || pos>=(int)total) continue;en=preset_at((uint32_t)pos,&index);if(en==NENGINES)up_name(index,name);else str_cpy(name,ENGINES[en]->presets[index].name,sizeof name);}
+            else {if(pos<0 || pos>=engine->npresets) continue;
+                if(row==2)lf_sound_name(TSEL,name);else str_cpy(name,engine->presets[pos].name,sizeof name);}
             if(row==2) {cv_rect(4,0,232,38,RGB(29,26,42));cv_rect(4,0,3,38,LF_COLOR[song.sel]);
                 cv_text(14,4,text_w(&FONT_L,name)<=216?&FONT_L:&FONT_S,name,LF_COLOR[song.sel]);}
             else lf_text(18,10,name,LF_DIM);

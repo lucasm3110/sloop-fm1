@@ -72,6 +72,7 @@ static void controls(void) {
     assert(preset_pos(&total)==(at+1)%total);
     tap(B_EDIT);assert(lf_page==LF_SOUND);e=TSEL->eng_req;
     encs[panel.enc[EN_SELECT]]=1;lf_ui_input(0);assert(TSEL->eng_req==e+1);
+    e=TSEL->eng_req;encs[panel.enc[EN_PRESET]]=1;lf_ui_input(0);assert(TSEL->eng_req==e && TSEL->preset==1);
     encs[panel.enc[EN_ALGO]]=1;lf_ui_input(0);assert(song.sel==1 && lf_page==LF_SOUND);
     tap(B_FX);lf_effect=1;lf_fxpage=0;lf[LF_EQ]=0;
     encs[panel.enc[EN_K2]]=10;lf_ui_input(0);assert(lf[LF_EQ]);
