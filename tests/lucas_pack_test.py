@@ -4,12 +4,25 @@ from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools'))
 from lucas_pack import pack,validate_pack,prepare,key
 from sampleio import IMA_STEP,IMA_IDX
+from lucas_preload import preload,entries
+from fm1pkg_make import ufw
 class PackTests(unittest.TestCase):
     def entry(self,n=1000):return dict(name='Birds',kind=0,root=255,bpm=0,bars=0,flags=0,rate=16000,n=n*2,data=bytes(n))
     def test_ten_slots(self):
         p=dict(format='lucas-fm-loops',version=1,slots=pack([self.entry() for _ in range(10)]))
         validate_pack(p);self.assertEqual(len(p['slots']),4)
         p['slots'][0]['data']='bad';self.assertRaises(Exception,validate_pack,p)
+    def test_preloaded_package(self):
+        import json
+        p=json.loads(Path('assets/loops-cc0/park-in-d.lucaspack').read_text())
+        original=bytes([42])*0x93000;image=preload(original,p)
+        self.assertEqual(image[:0x93000],original)
+        self.assertEqual(len(image),0x100000)
+        decoded=entries(ufw(image,b'loader','FM-1_802'))
+        self.assertEqual(decoded[0],image);self.assertEqual(decoded[100],b'loader')
+        for slot in p['slots']:
+            data=base64.b64decode(slot['data']);off=[0xa0000,0xb4000,0xc8000,0xe7000][slot['slot']]
+            self.assertEqual(image[off:off+len(data)],data)
     def test_overflow(self):self.assertRaises(ValueError,pack,[self.entry(80000) for _ in range(5)])
     def test_boundary(self):
         p=dict(format='lucas-fm-loops',version=1,slots=pack([self.entry()]))

@@ -66,6 +66,32 @@ static void effects(void) {
     for(i=0;i<CTL;i++)assert(l[i]==1234 && r[i]==-3456);lf_cpu_guard=0;
     assert(lf_pitch_offset(0,2)==0);puts("PASS: exact dry bypass, four modulation modes mono/wide, grain feedback/headroom bounded");
 }
+static void controls(void) {
+    unsigned total,at,e;track_select(0);lf_open(LF_HOME);
+    at=preset_pos(&total);encs[panel.enc[EN_PRESET]]=1;lf_ui_input(0);
+    assert(preset_pos(&total)==(at+1)%total);
+    tap(B_EDIT);assert(lf_page==LF_SOUND);e=TSEL->eng_req;
+    encs[panel.enc[EN_SELECT]]=1;lf_ui_input(0);assert(TSEL->eng_req==e+1);
+    encs[panel.enc[EN_ALGO]]=1;lf_ui_input(0);assert(song.sel==1 && lf_page==LF_SOUND);
+    tap(B_FX);lf_effect=1;lf_fxpage=0;lf[LF_EQ]=0;
+    encs[panel.enc[EN_K2]]=10;lf_ui_input(0);assert(lf[LF_EQ]);
+    tap(B_EDIT);assert(!lf[LF_EQ]);tap(B_EDIT);assert(lf[LF_EQ]);
+    lf_effect=4;lf[LF_GMIX]=0;tap(B_EDIT);assert(lf[LF_GMIX]==80);
+    tap(B_EDIT);assert(!lf[LF_GMIX]);tap(B_EDIT);assert(lf[LF_GMIX]==80);
+    puts("PASS: Home presets, direct sound page, engine/track selection, auto-active EQ and effect bypass");
+}
+static void audible_effects(void) {
+    int32_t l[CTL],r[CTL];unsigned i,j;int64_t energy=0;
+    lf_defaults();memset(lf_smooth,0,sizeof lf_smooth);memset(lf_eqstate,0,sizeof lf_eqstate);
+    lf[LF_EQ]=1;lf[LF_LOW]=100;
+    for(j=0;j<100;j++){for(i=0;i<CTL;i++)l[i]=r[i]=12000;lf_master_fx(l,r,CTL);}
+    for(i=0;i<CTL;i++)assert(abs(l[i])<50); /* low-cut removes DC */
+    lf_defaults();memset(lf_smooth,0,sizeof lf_smooth);memset(lf_grainbuf,0,sizeof lf_grainbuf);
+    memset(lf_grains,0,sizeof lf_grains);lf_gw=lf_grain_clock=0;lf[LF_GMIX]=127;lf[LF_DENSITY]=100;
+    for(j=0;j<2000;j++){for(i=0;i<CTL;i++)l[i]=r[i]=j<800?(int32_t)osc_sine((j*CTL+i)*9739152u)/3:0;
+        lf_master_fx(l,r,CTL);if(j>=800)for(i=0;i<CTL;i++)energy+=abs(l[i])+abs(r[i]);}
+    assert(energy>100000);puts("PASS: EQ measurably removes DC; Grain produces an audible delayed tail");
+}
 static void persistence(void) {
     project_t a,b;unsigned i;
     for(i=0;i<LF_COUNT;i++)lf[i]=(uint8_t)((i*3)%128);
@@ -81,6 +107,6 @@ int main(int argc,char **argv) {
     for(unsigned type=0;type<7;type++)for(unsigned page=0;page<2;page++){lf_open(LF_EFFECTS);lf_effect=type;lf_fxpage=page;lf_ui_draw();}
     tap(B_HOME);assert(lf_page==LF_HOME);tap(B_LFO);assert(lf_page==LF_LOOPS);tap(B_HOME);tap(B_ARP);assert(lf_page==LF_PLAY);
     tap(B_SCL);assert(lf_page==LF_KEY);tap(B_HOME);assert(lf_page==LF_HOME);
-    chords();if(argc>1){load_pack(argv[1]);loops();}effects();persistence();
+    chords();if(argc>1){load_pack(argv[1]);loops();}effects();controls();audible_effects();persistence();
     puts("PASS: all Lucas navigation and knob pages rendered within 240x240");return 0;
 }

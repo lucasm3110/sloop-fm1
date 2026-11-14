@@ -186,6 +186,11 @@ UI_SMALL static void felucca_init(void)
 #if LUCAS_FM
     for(i=0;i<NPART;i++) {trk[i].p[P_ROOT]=2;trk[i].p[P_SCALE]=1;trk[i].p[P_QUANT]=2;}
     trk[0].p[P_CHORD]=1;song.g[G_BPM]=72;
+    /* Ready-to-play starter beat; an existing autosave below replaces it. */
+    for(i=0;i<16;i+=2)dstep_set(&TDRUM->dstep[i],lane_of_note(42),LV_SOFT,0);
+    for(i=0;i<16;i+=4)dstep_set(&TDRUM->dstep[i],lane_of_note(36),LV_NORM,0);
+    dstep_set(&TDRUM->dstep[4],lane_of_note(38),LV_NORM,0);
+    dstep_set(&TDRUM->dstep[12],lane_of_note(38),LV_NORM,0);
 #endif
     autosave_resume();                        /* the project as it was left (project.c) */
     song.g[G_SYNC] = (int16_t)lights_sync;    /* a setting of the FM-1 (panel.c) */

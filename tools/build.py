@@ -47,7 +47,7 @@ SDK_SHA256 = {
     "cfg/eq_cfg_hw.bin": "41167491bffed4651750719c973d2758adeb9021a5670d02d6a53c85ed80ea7d",
 }
 
-PRODUCT = "FM-1_801"                # package identity; release builds are FM-1_9XY
+PRODUCT = "FM-1_802"                # Lucas FM 0.2; a fresh browser save per package
 VERSION = None                      # FELUCCA_VERSION for release builds (default: firmware/src/ui.c)
 
 
@@ -356,6 +356,11 @@ def main():
         raise SystemExit("build: checks failed")
     pkg = fm1pkg_make.ufw(fm1pkg_make.flash_image(img, fm1pkg_make.KEY), ota, PRODUCT)
     (OUT / name).write_bytes(pkg)
+    from lucas_preload import preload
+    import json
+    starter = json.loads((SRC / "assets/loops-cc0/park-in-d.lucaspack").read_text())
+    ready = preload(fm1pkg_make.flash_image(img, fm1pkg_make.KEY), starter)
+    (OUT / "felucca.play.fwsc").write_bytes(fm1pkg_make.ufw(ready, ota, PRODUCT))
     att = SRC / "assets" / "samples-cc0" / "ATTRIBUTION.txt"
     if att.exists():
         shutil.copy(att, OUT / "ATTRIBUTION.txt")

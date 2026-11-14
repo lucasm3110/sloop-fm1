@@ -103,7 +103,9 @@ static void lf_master_fx(int32_t *l,int32_t *r,uint32_t n)
             int32_t feed=lf[LF_PITCH]==1?(lf_grain_ref<12?lf_tonal[i]:0):(x[0]+x[1])/2;
             lf_grainbuf[lf_gw++&(LF_GBUF-1)]=(int16_t)clamp(feed+(wet[0]+wet[1])*lf[LF_FEEDBACK]/400,-24000,24000);
         }
-        l[i]=x[0]+wet[0]*gm/127;r[i]=x[1]+wet[1]*gm/127;
+        /* MIX is a real dry/wet crossfade; four windowed grains need makeup gain. */
+        l[i]=(x[0]*(127-gm)+wet[0]*gm*4)/127;
+        r[i]=(x[1]*(127-gm)+wet[1]*gm*4)/127;
     }
     lf_fx_delta[0]=l[n-1]-dl;lf_fx_delta[1]=r[n-1]-dr;
 }
