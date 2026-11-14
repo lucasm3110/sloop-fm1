@@ -20,6 +20,7 @@ static void chords(void) {
     for(unsigned root=0;root<12;root++) {t->p[P_ROOT]=root;
         for(unsigned d=0;d<7;d++) {uint8_t notes[4];unsigned n=kb_map(t,key_of_white(d+4));assert(n==60+root+major[d]);assert(chord_notes(t,n,notes)==3);assert(notes[1]-n==third[d] && notes[2]-n==fifth[d]);}}
     t->p[P_ROOT]=2;
+    fm1_in.notes=1u<<7;block(100);assert(lf_note[0]==62);fm1_in.notes=0;block(100);
     lf_mode_set(0);for(unsigned k=0;k<27;k++)assert(kb_map(t,k)==53+k);
     lf_mode_set(2);t->p[P_AHOLD]=1;
     fm1_in.notes=1u<<7;block(100);fm1_in.notes=0;block(100);assert(kh_any(t));
@@ -74,7 +75,7 @@ static void persistence(void) {
 }
 int main(int argc,char **argv) {
     host_tracks_init();panel_init();settings_init();layers_init();lf_open(LF_HOME);
-    for(unsigned p=0;p<=LF_SAVE;p++){lf_open(p);lf_ui_draw();}
+    for(unsigned p=0;p<=LF_LOOPINFO;p++){lf_open(p);lf_ui_draw();}
     for(unsigned type=0;type<7;type++)for(unsigned page=0;page<2;page++){lf_open(LF_EFFECTS);lf_effect=type;lf_fxpage=page;lf_ui_draw();}
     tap(B_HOME);assert(lf_page==LF_HOME);tap(B_LFO);assert(lf_page==LF_LOOPS);tap(B_HOME);tap(B_ARP);assert(lf_page==LF_PLAY);
     tap(B_SCL);assert(lf_page==LF_KEY);tap(B_HOME);assert(lf_page==LF_HOME);

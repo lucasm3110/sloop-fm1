@@ -1896,6 +1896,9 @@ static void input_on(track_t *t, uint32_t note, uint32_t vel)
         return;
     }
     last_note = (uint8_t)note;
+#if LUCAS_FM
+    lf_note[trk_index(t)%NTRK]=in_key?kb_root[in_key-1u]:(uint8_t)note;
+#endif
     {   /* (2.6) played again under the pedal: the note-off it waited with first (the arp's key count, a recording's
          * note end), then this one held by its key */
         uint32_t *w = &sus_wait[trk_index(t) % NTRK][(note >> 5) & 3u], bit = 1u << (note & 31u);
@@ -2121,6 +2124,9 @@ static uint32_t key_lvl(void)
 /* CHORD+: the modifiers held (the black keys down in chord mode) */
 static uint32_t chord_mods(void)
 {
+#if LUCAS_FM
+    if(!lf_advanced) return 0;
+#endif
     uint32_t k, m = 0;
     for (k = 0; k < 27u; k++)
         if (kb_kind[k] == KS_MOD)

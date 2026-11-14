@@ -24,7 +24,7 @@ UI_SMALL static void lf_key_change(uint32_t id,int32_t delta)
     uint32_t i;
     int32_t v=clamp(trk[0].p[id]+delta,id==P_SCALE?1:0,id==P_SCALE?NSCALES-1:11);
     lf_release(7);
-    for(i=0;i<NPART;i++) trk[i].p[id]=(int16_t)v;
+    for(i=0;i<NPART;i++) {trk[i].p[id]=(int16_t)v;lf_note[i]=(uint8_t)(60+trk[i].p[P_ROOT]);}
 }
 static uint32_t lf_mode(void) { return TSEL->p[P_CHORD]?2u:TSEL->p[P_QUANT]?1u:0u; }
 UI_SMALL static void lf_mode_set(int32_t v)
@@ -242,6 +242,7 @@ UI_SMALL static int lf_ui_draw(void)
             lf_text(5,20,(lf_page==LF_LOOPS || lf_page==LF_LOOPINFO)?"10 SOUNDS / 4 LAYERS":LF_ROLE[song.sel],LF_DIM);
             if(ci_on)lf_num(206,20,4-ci_beat,LF_COLOR[3]);
             if(lf_dirty()) lf_text(224,20,"*",LF_COLOR[2]);
+            if(song.cpu_q8>217)lf_text(184,20,"LOAD",LF_COLOR[3]);
         } else if(row==5) lf_footer(lab,val);
         else if(lf_page==LF_HOME || lf_page==LF_SEQUENCE || lf_page==LF_MIX) {
             uint32_t t=row-1,x; track_t *tr=&trk[t];
@@ -258,12 +259,12 @@ UI_SMALL static int lf_ui_draw(void)
             if(row==3) {char b[16];fmt_int(b,song.g[G_BPM]);cv_text(8,3,&FONT_L,b,LF_TEXT);lf_text(79,17,"BPM",LF_DIM);}
             if(row==4) lf_text(8,10,"LIVE KEYS / PACK MATCH",LF_DIM);
         } else if(lf_page==LF_PLAY) {
-            uint8_t ns[4]={(uint8_t)last_note,0,0,0};char name[16];uint32_t nn=1;
-            if(TSEL->p[P_CHORD]) nn=chord_notes(TSEL,last_note,ns);
+            uint8_t root=lf_note[song.sel],ns[4]={root,0,0,0};char name[16];uint32_t nn=1;
+            if(TSEL->p[P_CHORD]) nn=chord_notes(TSEL,root,ns);
             lf_chord_name(name,ns,nn);
             if(lf_mode() && !is_drum(TSEL)) {
                 static const int16_t xy[7][2]={{120,15},{176,43},{190,96},{151,140},{89,140},{50,96},{64,43}};
-                uint32_t deg=0,mask=scale_mask(TSEL),d=(last_note+120-TSEL->p[P_ROOT])%12;
+                uint32_t deg=0,mask=scale_mask(TSEL),d=(root+120-TSEL->p[P_ROOT])%12;
                 for(k=0;k<d;k++) if(mask&(1u<<k))deg++;
                 cv_oy=-(int32_t)(row-1)*40;
                 for(k=0;k<7;k++) {
@@ -272,9 +273,11 @@ UI_SMALL static int lf_ui_draw(void)
                     for(dy=-11;dy<=11;dy++)for(dx=-11;dx<=11;dx++)if(dx*dx+dy*dy<=121)cv_pset(x+dx,y+dy,k==deg?LF_COLOR[0]:RGB(45,40,62));
                     lf_num(x-4,y-8,k+1,k==deg?LF_BG:LF_TEXT);
                 }
-                cv_text(120-text_w(&FONT_L,name)/2,63,&FONT_L,name,LF_COLOR[song.sel]);
+                {const char *quality=nn<3?"NOTE":(ns[2]-ns[0])%12==6?"DIM":(ns[1]-ns[0])%12==3?"MIN":"MAJ";
+                    const char *rootname=N_NOTE[root%12];cv_text(120-text_w(&FONT_L,rootname)/2,54,&FONT_L,rootname,LF_COLOR[song.sel]);
+                    lf_text(120-text_w(&FONT_S,quality)/2,87,quality,LF_DIM);}
                 {int width=0,x;for(k=0;k<nn;k++)width+=text_w(&FONT_S,N_NOTE[ns[k]%12])+8;x=120-width/2;
-                    for(k=0;k<nn;k++){lf_text(x,99,N_NOTE[ns[k]%12],LF_TEXT);x+=text_w(&FONT_S,N_NOTE[ns[k]%12])+8;}}
+                    for(k=0;k<nn;k++){lf_text(x,107,N_NOTE[ns[k]%12],LF_TEXT);x+=text_w(&FONT_S,N_NOTE[ns[k]%12])+8;}}
                 lf_text(180,0,TSEL->p[P_AHOLD]?"HELD":"FREE",LF_DIM);cv_oy=0;
             } else {
                 if(row==1)lf_text(8,4,is_drum(TSEL)?"DRUM KEYS":"GUIDED PIANO",LF_DIM);
