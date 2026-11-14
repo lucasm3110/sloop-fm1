@@ -26,6 +26,12 @@ def report(elf,ram=None):
         r['audio']=dict(zip(names,struct.unpack_from('<19I',b,v('felucca_dbg')-0x1c00000)))
         r['audio']['last_cpu_percent']=round(r['audio']['cpu_q8']*100/256,2)
         r['audio']['buffer_deadline_us']=256*1000000//44100
+        if 'shed_count' in s:r['audio']['shed_count']=struct.unpack_from('<I',b,v('shed_count')-0x1c00000)[0]
+        if 'lf_cpu_guard' in s:r['audio']['fx_guard']=b[v('lf_cpu_guard')-0x1c00000]
+        # Lucas 0.1 / pinned SLOOP ABI: p[71], four engine bytes, 8 voice_t[84].
+        if 'trk' in s:
+            base=v('trk')-0x1c00000;stride=s['trk'][1]//4
+            r['audio']['pitched_voices']=[sum(bool(b[base+t*stride+148+k*84+3]) for k in range(8)) for t in range(3)]
     return r
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('elf');p.add_argument('--ram');a=p.parse_args();print(json.dumps(report(a.elf,a.ram),indent=2))
