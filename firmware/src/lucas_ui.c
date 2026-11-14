@@ -72,7 +72,7 @@ UI_SMALL static int lf_ui_input(uint32_t pressed)
             transport_req=song.playing?2:1;
             if(song.playing) { lf_loops_stop(); lf_release(15); }
         } break;
-    case B_REC: rec_toggle(); break;
+    case B_REC: rec_tempo=1;rec_toggle(); break;
     case B_SCL: lf_open(lf_page==LF_KEY?LF_HOME:LF_KEY); break;
     case B_EDIT:
         if(lf_page==LF_HOME) lf_open(lf_dest);

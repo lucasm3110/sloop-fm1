@@ -470,7 +470,7 @@ static void lf_project_put(project_t *p)
 }
 static void lf_project_get(const project_t *p)
 {
-    uint32_t i;lf_defaults();lf_loops_stop();
+    uint32_t i;lf_defaults();lf_loops_stop();lf_scan_gen=0xFFFFFFFFu;
     if(pt_get(&p->t[3],LF_STORE[0])!=0x4C31) return;
     for(i=0;i<LF_COUNT;i++) lf[i]=(uint8_t)clamp(((uint16_t)pt_get(&p->t[3],LF_STORE[i/2+1])>>(8*(i&1)))&255,0,127);
     lf[LF_EQ]=!!lf[LF_EQ];lf[LF_MOD]%=4;lf[LF_PITCH]%=3;
