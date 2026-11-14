@@ -1,0 +1,51 @@
+name: Lucas FM firmware
+on:
+  push:
+    branches: ['codex/lucas-fm']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  firmware:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install Pillow
+      - uses: actions/cache@v4
+        with:
+          path: ~/.jieli
+          key: jieli-linux-pi32v2-v1
+      - run: test -x "$HOME/.jieli/toolchain/pi32v2/bin/clang" || sh tools/get_toolchain.sh
+      - name: Fetch pinned SDK files
+        run: |
+          for file in uboot.boot cfg_tool.bin cfg/eq_cfg_hw.bin; do
+            dest="$HOME/fw-AC79_AIoT_SDK/cpu/wl82/tools/$file"
+            mkdir -p "$(dirname "$dest")"
+            curl -fL --retry 3 "https://gitee.com/Jieli-Tech/fw-AC79_AIoT_SDK/raw/AC79NN_SDK_V1.2.1_2023-12-13/cpu/wl82/tools/$file" -o "$dest"
+          done
+      - name: Build actual firmware
+        run: sh build.sh
+      - name: Record build identity
+        run: |
+          git rev-parse HEAD > build/source-commit.txt
+          sha256sum build/felucca.fwsc > build/firmware.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: firmware-${{ github.sha }}
+          path: |
+            build/felucca.*
+            build/loader/ota.bin
+            build/gen/
+            build/source-commit.txt
+            build/firmware.sha256
+            build/ATTRIBUTION.txt
+      - name: Upstream tests
+        run: sh tests/run_tests.sh > build/test-results.txt 2>&1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: tests-${{ github.sha }}
+          path: build/test-results.txt
