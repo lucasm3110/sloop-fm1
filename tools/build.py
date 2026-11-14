@@ -358,7 +358,7 @@ def main():
     (OUT / name).write_bytes(pkg)
     from lucas_preload import preload
     import json
-    starter = json.loads((SRC / "assets/loops-cc0/park-in-d.lucaspack").read_text())
+    starter = json.loads((SRC / "assets/lucas-loops/four-layers.lucaspack").read_text())
     ready = preload(fm1pkg_make.flash_image(img, fm1pkg_make.KEY), starter)
     (OUT / "felucca.play.fwsc").write_bytes(fm1pkg_make.ufw(ready, ota, PRODUCT))
     att = SRC / "assets" / "samples-cc0" / "ATTRIBUTION.txt"
