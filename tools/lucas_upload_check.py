@@ -21,7 +21,7 @@ for s in pack['slots']:
  send(13,[k]+pack7(d[:512]),500)
 send(15,[])
 script=out/'upload.usb.txt';script.write_text(';'.join(sends));flash=out/'upload.flash.bin';flash.write_bytes((out/'fresh-base.bin').read_bytes())
-env=dict(os.environ,FM1_USB_SEND='@'+str(script),FM1_BENCH_KEYS=f'{t+1000}:LFO,{t+1200}:LFO^,{t+1800}:EDIT,{t+2000}:EDIT^',FM1_BENCH_WAV=str(out/'upload.pcm'),FM1_BENCH_PANEL=str(out/'upload.ppm'))
+env=dict(os.environ,FM1_USB_SEND='@'+str(script),FM1_BENCH_KEYS=f'{t+1000}:HOME,{t+1200}:HOME^,{t+1300}:e0:+4,{t+1800}:EDIT,{t+2000}:EDIT^,{t+2500}:EDIT,{t+2700}:EDIT^',FM1_BENCH_WAV=str(out/'upload.pcm'),FM1_BENCH_PANEL=str(out/'upload.ppm'))
 env.pop('FM1_BENCH_NOKEYS',None)
 with (out/'upload.log').open('w') as f:subprocess.run([a.runner,'--fwsc',str(out/'felucca.fwsc'),'--flash',str(flash),'--usb','--midi','none','--mhz','240','--shot',str(t+5000)],env=env,stdout=f,stderr=f,check=True)
 b=flash.read_bytes()

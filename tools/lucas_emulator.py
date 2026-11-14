@@ -44,16 +44,16 @@ for s in json.loads(Path('assets/loops-cc0/park-in-d.lucaspack').read_text())['s
 (out/'starter-flash.bin').write_bytes(base)
 if a.screens:
  cases={}
- for name,button in [('home','HOME'),('key','SCL'),('mix','GLO'),('sequence','SEQ')]:
+ for name,button in [('home','HOME'),('key','SCL'),('mix','GLO'),('sequence','SEQ'),('envelope','ENV'),('lfo','LFO'),('arpeggiator','ARP')]:
   ev=[];tap(ev,3000,button);cases[name]=ev
- ev=[];tap(ev,3000,'ARP');tap(ev,3800,'ARP');tap(ev,4600,'C4');cases['play']=ev
+ ev=[];tap(ev,3000,'SCL');tap(ev,3800,'EDIT');tap(ev,4600,'C4');cases['play']=ev
  ev=[];tap(ev,3000,'HOME');tap(ev,4500,'EDIT');cases['sound']=ev
- ev=[];tap(ev,3000,'LFO');tap(ev,3800,'EDIT');ev.append((4300,'e0:+1'));tap(ev,5000,'EDIT');ev.append((5500,'e0:+5'));tap(ev,6500,'EDIT');ev.append((7100,'e0:-6'));cases['loops']=ev
- ev=[];tap(ev,3000,'LFO');ev.append((3500,'e0:+6'));tap(ev,4500,'LFO');cases['loop-settings']=ev
- ev=[];tap(ev,3000,'FX');ev.append((3500,'e0:+3'));ev.append((4500,'e2:+65'));tap(ev,6000,'C4');cases['effects']=ev
+ ev=[];tap(ev,2200,'HOME');ev.append((2500,'e0:+4'));tap(ev,3000,'EDIT');tap(ev,3800,'EDIT');ev.append((4300,'e0:+1'));tap(ev,5000,'EDIT');ev.append((5500,'e0:+5'));tap(ev,6500,'EDIT');ev.append((7100,'e0:-6'));cases['loops']=ev
+ ev=[];tap(ev,3000,'EDIT');tap(ev,3800,'EDIT');cases['sound-edit']=ev
+ ev=[];tap(ev,3000,'FX');ev.append((3500,'e1:+3'));ev.append((4500,'e2:+65'));tap(ev,6000,'C4');cases['effects']=ev
  for name,ev in cases.items():
   r,ram=run(name,ev,9000,flash=base)
-  expected={'home':0,'play':1,'sound':2,'sequence':3,'loops':4,'mix':5,'key':6,'effects':7,'loop-settings':9}[name]
+  expected={'home':0,'play':1,'sound':2,'sequence':3,'loops':4,'mix':5,'key':1,'effects':6,'envelope':8,'lfo':9,'arpeggiator':10,'sound-edit':11}[name]
   assert r['lf_page']==[expected],(name,'wrong destination',r['lf_page'])
   if name=='play':assert r['lf_note'][0]==62,('wrong played root',r['lf_note'])
  # Record three chords, stop, retain undo, save and load an actual flash section.
@@ -67,14 +67,14 @@ if a.screens:
 if a.stress:
  run('idle-strict100',ms=6000,strict=True)
  # Four decoded imports, all shared new effects, 8 pitched MIDI notes + repeated drums.
- ev=[];tap(ev,3000,'LFO')
+ ev=[];tap(ev,2200,'HOME');ev.append((2500,'e0:+4'));tap(ev,3000,'EDIT')
  for i in range(4):
   if i:ev.append((3500+i*1200,'e0:+1'))
   tap(ev,4000+i*1200,'EDIT')
  tap(ev,9000,'FX');tap(ev,10500,'FX');ev.append((11000,'e5:+1'))
- ev.append((12000,'e0:+1'));ev.append((13000,'e2:+80'))
- ev.append((15000,'e0:+1'));ev.append((16000,'e2:+80'));ev.append((16000,'e4:+40'))
- ev.append((18000,'e0:+1'));ev.append((19000,'e2:+100'));tap(ev,21000,'FX');ev.append((22000,'e2:+80'));ev.append((22000,'e4:+100'))
+ ev.append((12000,'e1:+1'));ev.append((13000,'e2:+80'))
+ ev.append((15000,'e1:+1'));ev.append((16000,'e2:+80'));ev.append((16000,'e4:+40'))
+ ev.append((18000,'e1:+1'));ev.append((19000,'e2:+100'));tap(ev,21000,'FX');ev.append((22000,'e2:+80'));ev.append((22000,'e4:+100'))
  for i,n in enumerate([48,52,55,59,62,65,69,72]):ev.append((24000+i*40,f'm90{n:02x}64'))
  for t in range(24500,32000,250):ev.append((t,'m992464992a50992650'))
  for mhz in [100,240]:run('load-strict'+str(mhz),ev,33000,mhz,True,base,True)

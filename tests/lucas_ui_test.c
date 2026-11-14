@@ -92,7 +92,7 @@ static void controls(void) {
     turn(EN_ALGO,-2);assert(lf_effect==4);lf[LF_GMIX]=0;tap(B_EDIT);assert(lf[LF_GMIX]==80);
     tap(B_EDIT);assert(!lf[LF_GMIX]);tap(B_EDIT);assert(lf[LF_GMIX]==80);
     turn(EN_SELECT,3);assert(song.sel==3);tap(B_LFO);v=TSEL->p[P_LD_PIT];turn(EN_K2,10);assert(TSEL->p[P_LD_PIT]==v);
-    tap(B_HOME);tap(B_EDIT);tap(B_EDIT);assert(lf_page==LF_ADV);tap(B_HOME);assert(lf_page==LF_HOME);
+    tap(B_HOME);tap(B_EDIT);v=song.g[G_DRDLY];turn(EN_K4,1);assert(song.g[G_DRDLY]==v+1);tap(B_EDIT);assert(lf_page==LF_ADV);tap(B_HOME);assert(lf_page==LF_HOME);
     tap(B_SAVE);lf_save_action=0;tap(B_EDIT);assert(lf_confirm);turn(EN_PRESET,1);assert(!lf_confirm);
     puts("PASS: SELECT focus, ALGORITHM engine/effect/pattern, PRESETS sounds/banks, four Home levels, named ENV/LFO/ARP, safe drums and save confirmation");
 }

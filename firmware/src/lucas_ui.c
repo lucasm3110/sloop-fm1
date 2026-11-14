@@ -195,6 +195,7 @@ UI_SMALL static int lf_ui_input(uint32_t pressed)
             if(k==0) { if(is_drum(TSEL)) lf_gedit(G_DRLVL,s); else lf_pedit(P_LEVEL,s); }
             else if(k==1) lf_pedit(P_TFLT,s);
             else if(k==2) { if(is_drum(TSEL)) lf_gedit(G_DRREV,s); else lf_pedit(P_REV,s); }
+            else if(is_drum(TSEL))lf_gedit(G_DRDLY,s);
             else lf_mode_set(clamp((int32_t)lf_mode()+s,0,2));
         } else if(lf_voice_page()) {if(lf_page==LF_ARP && k==3)lf_release(1u<<song.sel);lf_pedit(lf_param(k),s);}
         else if(lf_page==LF_LOOPS) { uint32_t id=(lf_pick/4)*4+k; if(id<10) lf_edit(LF_LEVEL+id,s); }
@@ -269,6 +270,8 @@ UI_SMALL static void lf_values(const char **lab,char val[4][16])
         fmt_int(val[2],(is_drum(TSEL)?song.g[G_DRREV]:TSEL->p[P_REV])*100/127);str_cpy(val[3],modes[lf_mode()],16);
         if(lf_page==LF_MIX) {lab[1]="PAN";lab[2]="MUTE";lab[3]="SOLO";fmt_int(val[1],TSEL->p[P_PAN]);str_cpy(val[2],TSEL->p[P_MUTE]?"ON":"OFF",16);str_cpy(val[3],song.solo&(1u<<song.sel)?"ON":"OFF",16);}
     }
+    if(is_drum(TSEL) && lf_page==LF_SOUND) {lab[3]="DELAY";fmt_int(val[3],song.g[G_DRDLY]*100/127);}
+    if(is_drum(TSEL) && lf_page==LF_PLAY) {lab[3]="MAP";str_cpy(val[3],"DRUMS",16);}
     if(is_drum(TSEL) && lf_voice_page())for(k=0;k<4;k++){lab[k]="";val[k][0]=0;}
     if(lf_page==LF_EFFECTS) {
         static const char *const names[9][4]={{"ATTACK","DECAY","SUSTAIN","RELEASE"},{"LOWCUT","BASS","MID","TREBLE"},{"AMOUNT","TONE","OUTPUT",""},
@@ -379,8 +382,8 @@ UI_SMALL static int lf_ui_draw(void)
                 lf_text(166,0,TSEL->p[P_AHOLD]?"HELD":"FREE",LF_DIM);lf_text(4,0,"EDIT:HOLD",LF_DIM);cv_oy=0;
             } else {
                 if(row==1)lf_text(8,4,is_drum(TSEL)?"DRUM KEYS":"GUIDED PIANO",LF_DIM);
-                if(row==2)cv_text(82,0,&FONT_L,name,LF_COLOR[song.sel]);
-                if(row==3)lf_text(8,5,"ALL NOTES PLAYABLE",LF_DIM);
+                if(row==2)cv_text(82,0,&FONT_L,is_drum(TSEL)?"GM":name,LF_COLOR[song.sel]);
+                if(row==3)lf_text(8,5,is_drum(TSEL)?"SEQ: DRUM MACHINE":"ALL NOTES PLAYABLE",LF_DIM);
                 if(row==4) {
                     uint32_t pass,w;
                     for(pass=0;pass<2;pass++)for(k=0,w=0;k<27;k++) {
