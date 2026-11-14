@@ -47,7 +47,7 @@ SDK_SHA256 = {
     "cfg/eq_cfg_hw.bin": "41167491bffed4651750719c973d2758adeb9021a5670d02d6a53c85ed80ea7d",
 }
 
-PRODUCT = "FM-1_802"                # Lucas FM 0.2; a fresh browser save per package
+PRODUCT = "FM-1_803"                # Lucas FM 0.3; a fresh browser save per package
 VERSION = None                      # FELUCCA_VERSION for release builds (default: firmware/src/ui.c)
 
 

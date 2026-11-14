@@ -4,7 +4,7 @@
  * every element remembers what it last drew and is redrawn only on change. */
 #ifndef FELUCCA_VERSION
 #if LUCAS_FM
-#define FELUCCA_VERSION "LUCAS FM 0.2"
+#define FELUCCA_VERSION "LUCAS FM 0.3"
 #else
 #define FELUCCA_VERSION "SLOOP 2.8.5"
 #endif  /* the beat machine firmware for the FM-1 (based on Felucca) */

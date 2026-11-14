@@ -108,7 +108,7 @@ def main(pkg, version, out):
     pkg, out = Path(pkg), Path(out)
     raw = pkg.read_bytes()
     product = product_of(raw)
-    if not re.fullmatch(r"FM-1_(?:9\d\d|80[12])", product):
+    if not re.fullmatch(r"FM-1_(?:9\d\d|80[123])", product):
         raise SystemExit(f"{pkg}: identity {product!r} is not a supported Felucca/Lucas package")
     if b"FELUCCA-LOADER-1" not in raw:              # marker of firmware/loader
         raise SystemExit(f"{pkg}: no Felucca update loader in it")

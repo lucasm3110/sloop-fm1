@@ -66,20 +66,31 @@ static void effects(void) {
     for(i=0;i<CTL;i++)assert(l[i]==1234 && r[i]==-3456);lf_cpu_guard=0;
     assert(lf_pitch_offset(0,2)==0);puts("PASS: exact dry bypass, four modulation modes mono/wide, grain feedback/headroom bounded");
 }
+static void turn(unsigned role,int delta) {encs[panel.enc[role]]=delta;lf_ui_input(0);}
 static void controls(void) {
-    unsigned total,at,e;track_select(0);lf_open(LF_HOME);
-    at=preset_pos(&total);encs[panel.enc[EN_PRESET]]=1;lf_ui_input(0);
-    assert(preset_pos(&total)==(at+1)%total);
+    unsigned total,at,e;int v;track_select(0);lf_open(LF_HOME);
+    at=preset_pos(&total);turn(EN_PRESET,1);assert(preset_pos(&total)==(at+1)%total);
+    e=TSEL->eng_req;turn(EN_SELECT,1);assert(song.sel==1 && trk[0].eng_req==e);
+    e=TSEL->eng_req;turn(EN_ALGO,1);assert(TSEL->eng_req==e+1 && song.sel==1);
     tap(B_EDIT);assert(lf_page==LF_SOUND);e=TSEL->eng_req;
-    encs[panel.enc[EN_SELECT]]=1;lf_ui_input(0);assert(TSEL->eng_req==e+1);
-    e=TSEL->eng_req;encs[panel.enc[EN_PRESET]]=1;lf_ui_input(0);assert(TSEL->eng_req==e && TSEL->preset==1);
-    encs[panel.enc[EN_ALGO]]=1;lf_ui_input(0);assert(song.sel==1 && lf_page==LF_SOUND);
-    tap(B_FX);lf_effect=1;lf_fxpage=0;lf[LF_EQ]=0;
-    encs[panel.enc[EN_K2]]=10;lf_ui_input(0);assert(lf[LF_EQ]);
+    turn(EN_PRESET,1);assert(TSEL->eng_req==e && TSEL->preset==1);
+    tap(B_EDIT);assert(lf_page==LF_TONE && !lf_tonepage);tap(B_EDIT);assert(lf_tonepage);tap(B_EDIT);assert(lf_page==LF_SOUND);
+    tap(B_HOME);for(unsigned k=0;k<4;k++) {v=k==3?song.g[G_DRLVL]:trk[k].p[P_LEVEL];turn(EN_K1+k,-1);assert((k==3?song.g[G_DRLVL]:trk[k].p[P_LEVEL])==v-1);}
+    turn(EN_SELECT,8);assert(lf_home_loops && song.sel==1);tap(B_EDIT);assert(lf_page==LF_LOOPS);
+    turn(EN_PRESET,1);assert(lf_pick==4);turn(EN_SELECT,2);assert(lf_pick==6);
+    tap(B_HOME);assert(lf_page==LF_HOME);tap(B_ENV);assert(lf_page==LF_ENV);
+    v=TSEL->p[P_SUS];turn(EN_K3,-1);assert(TSEL->p[P_SUS]==v-1);
+    tap(B_LFO);assert(lf_page==LF_LFO);turn(EN_ALGO,2);assert(TSEL->p[P_LWAVE]==2);turn(EN_K2,12);assert(TSEL->p[P_LD_PIT]==12);
+    tap(B_ARP);assert(lf_page==LF_ARP);turn(EN_ALGO,1);assert(TSEL->p[P_AMODE]==1);turn(EN_K4,1);assert(TSEL->p[P_AHOLD]);
+    tap(B_SCL);assert(lf_page==LF_PLAY);v=song.g[G_BPM];turn(EN_K3,1);assert(song.g[G_BPM]==v+1);tap(B_EDIT);assert(!TSEL->p[P_AHOLD]);
+    tap(B_FX);lf_effect=1;lf_fxpage=0;lf[LF_EQ]=0;turn(EN_K2,10);assert(lf[LF_EQ]);
     tap(B_EDIT);assert(!lf[LF_EQ]);tap(B_EDIT);assert(lf[LF_EQ]);
-    lf_effect=4;lf[LF_GMIX]=0;tap(B_EDIT);assert(lf[LF_GMIX]==80);
+    turn(EN_ALGO,3);assert(lf_effect==4);lf[LF_GMIX]=0;tap(B_EDIT);assert(lf[LF_GMIX]==80);
     tap(B_EDIT);assert(!lf[LF_GMIX]);tap(B_EDIT);assert(lf[LF_GMIX]==80);
-    puts("PASS: Home presets, direct sound page, engine/track selection, auto-active EQ and effect bypass");
+    turn(EN_SELECT,3);assert(song.sel==3);tap(B_LFO);v=TSEL->p[P_LD_PIT];turn(EN_K2,10);assert(TSEL->p[P_LD_PIT]==v);
+    tap(B_HOME);tap(B_EDIT);tap(B_EDIT);assert(lf_page==LF_ADV);tap(B_HOME);assert(lf_page==LF_HOME);
+    tap(B_SAVE);lf_save_action=0;tap(B_EDIT);assert(lf_confirm);turn(EN_PRESET,1);assert(!lf_confirm);
+    puts("PASS: SELECT focus, ALGORITHM engine/effect/pattern, PRESETS sounds/banks, four Home levels, named ENV/LFO/ARP, safe drums and save confirmation");
 }
 static void audible_effects(void) {
     int32_t l[CTL],r[CTL];unsigned i,j;int64_t energy=0;
@@ -104,10 +115,13 @@ static void persistence(void) {
 }
 int main(int argc,char **argv) {
     host_tracks_init();panel_init();settings_init();layers_init();lf_open(LF_HOME);
-    for(unsigned p=0;p<=LF_LOOPINFO;p++){lf_open(p);lf_ui_draw();}
+    for(unsigned p=0;p<=LF_TONE;p++){lf_open(p);lf_ui_draw();}
     for(unsigned type=0;type<7;type++)for(unsigned page=0;page<2;page++){lf_open(LF_EFFECTS);lf_effect=type;lf_fxpage=page;lf_ui_draw();}
-    tap(B_HOME);assert(lf_page==LF_HOME);tap(B_LFO);assert(lf_page==LF_LOOPS);tap(B_HOME);tap(B_ARP);assert(lf_page==LF_PLAY);
-    tap(B_SCL);assert(lf_page==LF_KEY);tap(B_HOME);assert(lf_page==LF_HOME);
+    tap(B_HOME);assert(lf_page==LF_HOME);tap(B_LFO);assert(lf_page==LF_LFO);tap(B_HOME);tap(B_ARP);assert(lf_page==LF_ARP);
+    tap(B_SCL);assert(lf_page==LF_PLAY);tap(B_HOME);assert(lf_page==LF_HOME);
     chords();if(argc>1){load_pack(argv[1]);loops();}effects();controls();audible_effects();persistence();
+    if(argc>2) {outdir=argv[2];track_select(0);lf_defaults();ui.msg_t=0;
+        for(unsigned p=0;p<=LF_TONE;p++) {char name[24];lf_open(p);lf_ui_draw();snprintf(name,sizeof name,"lucas-%u",p);ppm(name);}
+    }
     puts("PASS: all Lucas navigation and knob pages rendered within 240x240");return 0;
 }

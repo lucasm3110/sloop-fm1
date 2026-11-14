@@ -1622,7 +1622,7 @@ async function packages() {
   const logical = py(`import sys; raw = open(sys.argv[1], "rb").read()
 sys.stdout.buffer.write(b"".join(raw[i * 48:i * 48 + 47] for i in range(20)) + raw[960:])`, pkg);
   ok(eq(logicalImage(raw), logical), "fm1pkg.js logicalImage");
-  ok(/^FM-1_(80[12]|9\d\d)$/.test(productOf(raw)), "fm1pkg.js productOf");
+  ok(/^FM-1_(80[123]|9\d\d)$/.test(productOf(raw)), "fm1pkg.js productOf");
 }
 
 /* ------------------------------------------------- update protocol (fm1ota.js) --- */
