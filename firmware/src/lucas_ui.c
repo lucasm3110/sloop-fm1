@@ -412,6 +412,10 @@ UI_SMALL static int lf_ui_draw(void)
             for(k=0;k<4;k++) if(lf_layers[k].active && lf_layers[k].id==id) state=lf_layers[k].queued?"WAIT":lf_layers[k].want?"PLAY":"FADE";
             if(id==lf_pick) cv_rect(0,0,3,40,LF_COLOR[0]);
             lf_num(6,0,id+1,LF_DIM);lf_text(30,0,lf_library[id].valid?lf_library[id].meta.name:"EMPTY",LF_TEXT);
+            if(lf_library[id].valid) {const lf_meta_t *m=&lf_library[id].meta;
+                if(m->root<12)lf_text(145,0,N_NOTE[m->root],LF_DIM);
+                if(m->bpm) {lf_num(180,0,m->bpm,LF_DIM);lf_text(208,0,"BPM",LF_DIM);}
+            }
             lf_text(30,20,!lf_library[id].valid?"IMPORT":!lf_matches(id)?"MISMATCH":state,LF_COLOR[1]);
             {static const char *const match[]={"FREE","KEY","BPM","K+B"};lf_text(100,20,match[lf[LF_FLAGS+id]&3],LF_DIM);}
             if(id==lf_pick)lf_text(141,20,"EDIT",LF_COLOR[0]);lf_num(195,20,lf[LF_LEVEL+id]*100/127,LF_DIM);
