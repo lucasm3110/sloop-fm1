@@ -3575,3 +3575,17 @@ static void events_block(uint32_t n)
 #endif
     }
 }
+
+#if LUCAS_FM
+static uint32_t lf_bar(void) { return clk_beat / 4u; }
+#endif
+
+#if LUCAS_FM
+static int32_t lf_pitch_offset(int32_t d,uint32_t root)
+{
+    uint32_t mask=scale_mask(&trk[0]),i;
+    for(i=0;i<12;i++) {int32_t q=d-(int32_t)i;
+        if(mask&(1u<<((root+q+120u-trk[0].p[P_ROOT])%12))) return q;
+    }return 0;
+}
+#endif

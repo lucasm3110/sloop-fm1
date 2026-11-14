@@ -144,7 +144,10 @@ static void check(int ok, const char *what) { printf("ui: %-74s %s\n", what, ok 
 static const char *sub_line(void) { return layer_sub_shown; }   /* the layer's sub line as last drawn (ui_layers.c) */
 
 #ifndef UI_PAGES_HARNESS_ONLY                       /* (tests/stress_test.c: the harness, its own main) */
-int main(int argc, char **argv)
+#ifndef UI_TEST_MAIN
+#define UI_TEST_MAIN main
+#endif
+int UI_TEST_MAIN(int argc, char **argv)
 {
     uint32_t i;
     outdir = argc > 1 ? argv[1] : "build/host";

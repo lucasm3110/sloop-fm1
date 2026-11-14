@@ -183,6 +183,10 @@ UI_SMALL static void felucca_init(void)
     TDRUM->p[P_E0] = DRUM_DEFAULT_KIT;        /* the 808 kit */
     song.sel = 0;
     song.master_q12 = 2048;
+#if LUCAS_FM
+    for(i=0;i<NPART;i++) {trk[i].p[P_ROOT]=2;trk[i].p[P_SCALE]=1;trk[i].p[P_QUANT]=2;}
+    trk[0].p[P_CHORD]=1;song.g[G_BPM]=72;
+#endif
     autosave_resume();                        /* the project as it was left (project.c) */
     song.g[G_SYNC] = (int16_t)lights_sync;    /* a setting of the FM-1 (panel.c) */
     song.g[G_MIDI] = (int16_t)lights_mout;

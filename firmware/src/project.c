@@ -457,6 +457,27 @@ static void drum_tw_get(const project_t *p)
     }
 }
 
+#if LUCAS_FM
+static const uint8_t LF_STORE[]={P_ATK,P_DEC,P_SUS,P_REL,P_ED_FLT,P_ED_PIT,P_ED_SHP,P_ED_FX,
+    P_LRATE,P_LWAVE,P_LPHASE,P_LFADE,P_LD_PIT,P_LD_FLT,P_LD_SHP,P_LD_AMP,
+    P_AMODE,P_ARATE,P_AOCT,P_AGATE,P_ASWING,P_APROB,P_AHOLD,P_AORDER};
+_Static_assert(LF_COUNT<=46,"Lucas extension fits drum synth fields");
+static void lf_project_put(project_t *p)
+{
+    uint32_t i;pt_set(&p->t[3],LF_STORE[0],0x4C31);
+    for(i=0;i<23;i++) {uint32_t a=i*2,b=a+1;
+        pt_set(&p->t[3],LF_STORE[i+1],(int16_t)((a<LF_COUNT?lf[a]:0)|((b<LF_COUNT?lf[b]:0)<<8)));}
+}
+static void lf_project_get(const project_t *p)
+{
+    uint32_t i;lf_defaults();lf_loops_stop();
+    if(pt_get(&p->t[3],LF_STORE[0])!=0x4C31) return;
+    for(i=0;i<LF_COUNT;i++) lf[i]=(uint8_t)clamp(((uint16_t)pt_get(&p->t[3],LF_STORE[i/2+1])>>(8*(i&1)))&255,0,127);
+    lf[LF_EQ]=!!lf[LF_EQ];lf[LF_MOD]%=4;lf[LF_PITCH]%=3;
+    for(i=0;i<10;i++)lf[LF_FLAGS+i]&=3;
+}
+#endif
+
 UI_SMALL static void proj_capture(project_t *p)        /* what is playing now, as a project */
 {
     uint32_t i;
@@ -480,6 +501,9 @@ UI_SMALL static void proj_capture(project_t *p)        /* what is playing now, a
         memcpy(p->t[i].lock, trk[i].lock, sizeof trk[i].lock);
     }
     drum_tw_put(p);                                     /* (2.7) the drum sounds' TUNE and DECAY */
+#if LUCAS_FM
+    lf_project_put(p);
+#endif
     p->sum = proj_sum(p);
 }
 
@@ -496,6 +520,9 @@ static void proj_apply(const project_t *p, int all)
                                                                  * its slot and G_INFO's hold the TEXTURE) */
             song.g[i] = (int16_t)clamp(p->g[i], GP[i].min, GP[i].max);
     song.g[G_DRDLY] = (int16_t)clamp(p->drdly, GP[G_DRDLY].min, GP[G_DRDLY].max);   /* (a load and a section, as REV) */
+#if LUCAS_FM
+    lf_project_get(p);
+#endif
     proj_tx_get(p);                                     /* GLO > TEXTURE (2.6): a load and a section */
     drum_tw_get(p);                                     /* (2.7) the drum sounds' TUNE and DECAY: a load and a section */
     for (k = 0; k < NTRK; k++) {
@@ -698,6 +725,9 @@ static uint32_t autosave_hash, autosave_ms, autosave_checked;
 UI_SMALL static int audio_quiet(void)
 {
     uint32_t p, i;
+#if LUCAS_FM
+    for(i=0;i<LF_LAYERS;i++) if(lf_layers[i].active) return 0;
+#endif
     for (p = 0; p < NPART; p++)
         for (i = 0; i < NVOICE; i++)
             if (trk[p].v[i].active)
@@ -1218,3 +1248,13 @@ UI_SMALL static void sections_flush(void)                        /* main loop */
 }
 #endif
 #endif /* PROJ_HOST */
+
+#if LUCAS_FM && !defined(PROJ_HOST)
+static uint32_t lf_dirty(void)
+{
+    /* Capture only at UI cadence; existing autosave checksum is the authority. */
+    static uint32_t at,dirty;
+    if(fm1_ms-at>250u) {at=fm1_ms;proj_capture(&autosave_buf);dirty=autosave_buf.sum!=autosave_hash;}
+    return dirty;
+}
+#endif

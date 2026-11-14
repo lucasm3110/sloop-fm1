@@ -406,3 +406,5 @@ static volatile uint32_t fm1_ms;  /* milliseconds since boot (TIMER4-based, TIME
 /* Two early failed boots -> USB recovery; recovery reset -> mask-ROM UBOOT. */
 #include "bootguard.h"
 bootguard_t bootguard __attribute__((section(".noinit")));
+
+#include "lucas_state.h"

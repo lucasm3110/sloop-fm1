@@ -1052,6 +1052,9 @@ static uint8_t vis_on, vis_shown_last, vis_name_t;   /* the visualiser (ui_vis.c
 UI_SMALL static void ui_draw(void)
 {
     ui.frame++;
+#if LUCAS_FM
+    if(lf_ui_draw()) return;
+#endif
     pads_tick();
     if (rec_go) {                                       /* the take started: say so */
         rec_go = 0;

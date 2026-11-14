@@ -162,6 +162,9 @@ UI_SMALL static uint32_t keys_lit(void)
         return m | fm1_in.notes | 1u << drum_black_key(drum_lane);   /* (2.7.1) its sound's black key */
     }
     m = fm1_in.notes;
+#if LUCAS_FM
+    if(!is_drum(t) && !t->p[P_QUANT] && !t->p[P_CHORD]) m |= scale_keys(0);
+#endif
     if (is_drum(t) || lights_notes)                /* the drum track: each hit lights its key; NOTES: the synths too */
         m |= keys_sounding(t);
     return m;
@@ -1104,6 +1107,9 @@ UI_SMALL static void remote_poll(void)
 UI_SMALL static void ui_input(void)
 {
     uint32_t pressed = fm1_input_edges(0), notes = fm1_input_note_edges(), now = fm1_ticks(), id, b, k;
+#if LUCAS_FM
+    if(lf_ui_input(pressed)) return;
+#endif
     uint32_t home = btn_hold(&ui.home_t0, B_HOME, now, 1);
     int32_t s;
     int layered;
@@ -1383,3 +1389,7 @@ timeout:
     ui.force = 1;
     ui_message("SETUP CANCELLED");
 }
+
+#if LUCAS_FM
+#include "lucas_ui.c"
+#endif

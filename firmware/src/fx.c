@@ -1175,6 +1175,11 @@ static void texture_mix(int32_t *l, int32_t *r, uint32_t n)
         texture_reset(src);                             /* faded out: the new source from rest */
 }
 
+#if LUCAS_FM
+#include "lucas_fx.c"
+#include "lucas_loops.c"
+#endif
+
 static void mix_block(int32_t *out, uint32_t n)
 {
     uint32_t i, c1;
@@ -1215,6 +1220,9 @@ static void mix_block(int32_t *out, uint32_t n)
             acc[0].sr[i] += acc[1].sr[i];
         }
     }
+#if LUCAS_FM
+    lf_loops_mix(mix_l, mix_r, n);
+#endif
     texture_mix(mix_l, mix_r, n);                       /* GLO > TEXTURE (2.6): the bed, dry; after both cores' units
                                                          * (what it adds does not depend on them: the same sum) */
     punch_freeze_feed(acc[0].sr, mix_l, mix_r, n);     /* punch-in FREEZE: the whole dry mix into the held reverb */
@@ -1223,6 +1231,9 @@ static void mix_block(int32_t *out, uint32_t n)
         mix_l[i] += wet_l[i];
         mix_r[i] += wet_r[i];
     }
+#if LUCAS_FM
+    lf_master_fx(mix_l,mix_r,n);
+#endif
     dust_process(mix_l, mix_r, n);
     punch_process(mix_l, mix_r, n);
     djf_process(mix_l, mix_r, n);

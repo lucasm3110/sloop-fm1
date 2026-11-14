@@ -8,7 +8,15 @@
                                  * less: tools/build.py builds so by itself when the flash is full) */
 #define FELUCCA_LOGO_TEXT 0
 #endif
-#if FELUCCA_LOGO_TEXT
+#if LUCAS_FM
+UI_SMALL static void sloop_logo_draw(uint32_t y0)
+{
+    cv_begin(240,100,C_BLACK);
+    cv_text(24,18,&FONT_L,"LUCAS FM",RGB(172,151,255));
+    cv_text(24,65,&FONT_S,"PLAY SOMETHING",RGB(66,218,198));
+    cv_blit(0,y0+50);
+}
+#elif FELUCCA_LOGO_TEXT
 UI_SMALL static void sloop_logo_draw(uint32_t y0)
 {
     static const char L[5] = {'S', 'L', 'O', 'O', 'P'};
@@ -61,6 +69,6 @@ UI_SMALL static void sloop_splash(void)
         v += 6;                                         /* "SLOOP 1.0" -> "1.0" under the wordmark */
     cv_begin(240, 36, C_BLACK);
     cv_text(120 - text_w(&FONT_S, v) / 2, 0, &FONT_S, v, RGB(196, 196, 204));
-    cv_text(120 - text_w(&FONT_S, "based on felucca") / 2, 18, &FONT_S, "based on felucca", RGB(96, 96, 104));
+    cv_text(120 - text_w(&FONT_S, "SLOOP / FELUCCA") / 2, 18, &FONT_S, "SLOOP / FELUCCA", RGB(96, 96, 104));
     cv_blit(0, 202);
 }
