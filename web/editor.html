@@ -11535,6 +11535,7 @@ applyLang();
 const LFP = { format: 'lucas-fm-loops', version: 1, slots: [], entries: [], name: 'My collection' };
 let lfDraft = [];
 function lfPackValidate(p) {
+  if(!p.slots?.length || (p.preserve_slots||[]).some(k=>!Number.isInteger(k) || k<0 || k>3 || p.slots.some(s=>s.slot===k)))throw new Error("Invalid reserved slots");
   if (!p || p.format !== 'lucas-fm-loops' || p.version !== 1 || !Array.isArray(p.slots) || p.slots.length > 4) throw new Error('Not a Lucas FM loop collection');
   const used = new Set(), ids = new Set();
   for (const slot of p.slots) {
@@ -11597,7 +11598,7 @@ function lfPackSummary(p) {
     const m=512+j*24,name=new TextDecoder().decode(d.subarray(m,m+12)).replace(/\0.*$/,'');
     names.push(`${String(d[m+15]+1).padStart(2,'0')}. ${name} · ${['texture','tonal','rhythmic'][d[m+12]]} · ${d[m+13]<12?['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'][d[m+13]]:'natural pitch'} · ${v.getUint16(m+16,true)||'free'} BPM`);
   }}
-  $('lf-summary').textContent=names.sort().join('\n')+'\n\n'+p.slots.map(s=>`USR${s.slot+1}: ${(s.bytes/1024).toFixed(1)} / 80 KiB`).join(' · ')+'\nFour simultaneous layers. Loop slots share storage with sample instruments and user drum kits.';
+  $('lf-summary').textContent=names.sort().join('\n')+'\n\n'+p.slots.map(s=>`USR${s.slot+1}: ${(s.bytes/1024).toFixed(1)} / 80 KiB`).join(' · ')+'\nReserved slots: '+(p.preserve_slots||[]).map(k=>'USR'+(k+1)).join(', ')+'\nFour simultaneous layers. Loop slots share storage with sample instruments and user drum kits.';
 }
 function lfInvalidate() {lfReady=null;$('lf-summary').textContent='Changed: prepare this collection again before saving or transferring.';}
 function lfRows() {
@@ -11629,13 +11630,14 @@ lfPanel.append(el('button',{type:'button',onclick:async()=> {
   if(!lfReady || !dev)return report(new Error('Prepare a collection and connect Lucas FM first'));
   if(!String(dev.info.version).includes('LUCAS'))return report(new Error('This collection needs Lucas FM firmware'));
   if(smpBusy || busy)return;
-  if(!confirm('Replace the user sample slots with this collection? Back up existing samples and kits first. Stop playback before transfer.'))return;
+  if(!confirm('Replace this collection’s sample slots (reserved slots are kept)? Back up existing samples and kits first. Stop playback before transfer.'))return;
   smpBusy=true;busy++;
   try {
     lfPackValidate(lfReady);
     // All four slots form one collection; clear unused slots to avoid stale duplicate ids.
     for(let k=0;k<4;k++) {
       const s=lfReady.slots.find(s=>s.slot===k);
+      if(!s && (lfReady.preserve_slots||[]).includes(k))continue;
       if(!s) {const r=parse[CMD.SMP_ERASE](await rq(req.smpErase(k),{timeout:3000,retries:0}));if(r.rc)throw new Error(`Erase USR${k+1}: ${r.rc}`);continue;}
       const d=b64dec(s.data);let r=parse[CMD.SMP_BEGIN](await rq(req.smpBegin(k),{timeout:3000,retries:0}));if(r.rc)throw new Error(`Begin USR${k+1}: ${r.rc}`);
       for(let off=512;off<d.length;off+=256) {r=parse[CMD.SMP_WRITE](await rq(req.smpWrite(k,off,d.subarray(off,off+256)),{timeout:2000,retries:1}));if(r.rc)throw new Error(`Write USR${k+1}: ${r.rc}`);}

@@ -22,6 +22,9 @@ static void lf_master_fx(int32_t *l,int32_t *r,uint32_t n)
     uint32_t i,c,j;int32_t gm,amount;
     for(i=0;i<LF_LEVEL;i++) lf_smooth[i]+=(int32_t)(lf[i]*256-lf_smooth[i])/8;
     gm=lf_smooth[LF_GMIX]>>8;amount=lf_smooth[LF_AMOUNT]>>8;
+    if(!gm) {memset(lf_grains,0,sizeof lf_grains);lf_grain_clock=0;}
+    /* Bypass must also release the CPU budget: no ring-buffer work while dry. */
+    if(!lf[LF_EQ] && lf_smooth[LF_DRIVE]<256 && !amount && !gm) return;
     for(i=0;i<n;i++) {
         int32_t x[2]={l[i],r[i]},wet[2]={0,0};
         for(c=0;c<2;c++) {
@@ -41,8 +44,8 @@ static void lf_master_fx(int32_t *l,int32_t *r,uint32_t n)
                 x[c]+=(lf_drive_lp[c]-x[c])*a/127;
                 x[c]=x[c]*(lf_smooth[LF_OUTPUT]>>8)/100;
             }
-            lf_modbuf[c][lf_mw&(LF_RING-1)]=(int16_t)clamp(x[c],-32768,32767);
             if(amount) {
+                lf_modbuf[c][lf_mw&(LF_RING-1)]=(int16_t)clamp(x[c],-32768,32767);
                 uint32_t phase=lf_phase+(c?((uint32_t)(lf_smooth[LF_WIDTH]>>8)<<24):0);
                 int32_t wave=osc_sine(phase),depth=lf_smooth[LF_DEPTH]>>8,y;
                 if(lf[LF_MOD]<2) {
@@ -83,8 +86,8 @@ static void lf_master_fx(int32_t *l,int32_t *r,uint32_t n)
                 wet[0]+=y*(127-g->pan)/254;wet[1]+=y*(127+g->pan)/254;
                 g->pos+=g->step;if(++g->age>=g->len)g->len=0;
             }}
-        } else {memset(lf_grains,0,sizeof lf_grains);lf_grain_clock=0;}
-        {
+        }
+        if(gm) {
             int32_t feed=lf[LF_PITCH]==1?(lf_grain_ref<12?lf_tonal[i]:0):(x[0]+x[1])/2;
             lf_grainbuf[lf_gw++&(LF_GBUF-1)]=(int16_t)clamp(feed+(wet[0]+wet[1])*lf[LF_FEEDBACK]/400,-24000,24000);
         }

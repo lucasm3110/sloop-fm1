@@ -15,6 +15,6 @@ Soft beat: original one-bar 72 BPM arrangement of Versilian Studios VCSL
 CC0 kick, snare and hi-hat. See ../samples-cc0/ATTRIBUTION.txt for exact sources.
 The original arrangement and generated pad recordings are dedicated to CC0.
 
-The Desktop search found no user drum samples. No private samples are published.
+Personal Desktop samples are prepared separately and are not published.
 Storage is shared with SLOOP user sample instruments and drum kits. Installing
 this collection replaces all four user sample slots; export a backup first.

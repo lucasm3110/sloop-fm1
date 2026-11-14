@@ -59,11 +59,11 @@ def prepare(entry,base,target_key,target_bpm,rate):
                 flags=int(follow_key)|int(follow_bpm)<<1,rate=rate,n=len(samples),data=data,
                 source=str(entry['file']),sha256=hashlib.sha256(path.read_bytes()).hexdigest())
 
-def pack(entries):
+def pack(entries,available=(0,1,2,3)):
     if not 1<=len(entries)<=10: raise ValueError('one to ten entries per collection')
     banks=[[] for _ in range(4)]; sizes=[128]*4
     for id,e in sorted(enumerate(entries),key=lambda pair:len(pair[1]['data']),reverse=True):
-        candidates=[k for k in range(4) if len(banks[k])<4 and sizes[k]+len(e['data'])<=SLOT_SIZE-512]
+        candidates=[k for k in available if len(banks[k])<4 and sizes[k]+len(e['data'])<=SLOT_SIZE-512]
         if not candidates: raise ValueError('collection does not fit four 80 KiB slots; shorten sounds or lower rate')
         k=min(candidates,key=lambda k:sizes[k]); banks[k].append((id,e));sizes[k]+=len(e['data'])
     slots=[]
@@ -85,9 +85,11 @@ def pack(entries):
 def validate_pack(p):
     if p.get('format')!='lucas-fm-loops' or p.get('version')!=1: raise ValueError('not a Lucas loop pack v1')
     used=set(); ids=set()
+    preserve=p.get('preserve_slots',[])
+    if not p.get('slots') or any(k not in range(4) for k in preserve):raise ValueError('invalid reserved slots')
     for item in p['slots']:
         k=item['slot'];raw=base64.b64decode(item['data'],validate=True)
-        if k not in range(4) or k in used or len(raw)!=item['bytes'] or len(raw)>SLOT_SIZE or zlib.crc32(raw)!=item['crc']: raise ValueError('damaged or duplicate slot')
+        if k not in range(4) or k in preserve or k in used or len(raw)!=item['bytes'] or len(raw)>SLOT_SIZE or zlib.crc32(raw)!=item['crc']: raise ValueError('damaged or duplicate slot')
         used.add(k)
         magic,version,nz=struct.unpack_from('<IHB',raw)
         length,crc,marker=struct.unpack_from('<III',raw,16)
@@ -106,8 +108,10 @@ def main():
     a.add_argument('--flash',type=Path);args=a.parse_args()
     if not 30<=args.bpm<=300:a.error('BPM must be 30..300')
     source=json.loads(args.manifest.read_text());entries=[prepare(e,args.manifest.parent,key(args.key),args.bpm,args.rate) for e in source['sounds']]
+    available=source.get('slots',[0,1,2,3])
+    if not available or len(set(available))!=len(available) or any(k not in range(4) for k in available):raise ValueError('slots must be unique indices 0..3')
     result=dict(format='lucas-fm-loops',version=1,name=source.get('name','Collection'),key=args.key,bpm=args.bpm,
-                entries=[{k:v for k,v in e.items() if k!='data'} for e in entries],slots=pack(entries))
+                entries=[{k:v for k,v in e.items() if k!='data'} for e in entries],slots=pack(entries,available),preserve_slots=[k for k in range(4) if k not in available])
     validate_pack(result);args.output.parent.mkdir(parents=True,exist_ok=True);args.output.write_text(json.dumps(result,separators=(',',':')))
     for s in result['slots']: print(f'USR{s["slot"]+1}: {s["bytes"]:,} / {SLOT_SIZE:,} bytes')
     print(f'{len(entries)} library entries; four playback layers; {sum(e["n"]/e["rate"] for e in entries):.2f} seconds total')
