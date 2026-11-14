@@ -6,7 +6,7 @@ static uint32_t lf_hot_until,lf_cache[6];
 static const char *const LF_ROLE[]={"pad","bass","melody","rhythm"};
 static const uint16_t LF_COLOR[]={RGB(39,88,223),RGB(123,156,100),RGB(206,158,28),RGB(208,99,40)};
 static const uint16_t LF_BG=RGB(248,244,232),LF_INK=RGB(37,38,36),LF_DIM=RGB(126,126,118),LF_TRACK=RGB(206,204,193);
-static uint32_t lf_dirty(void);
+static void lf_save_scene(void);
 UI_SMALL static void lf_open(uint32_t page){lf_page=(uint8_t)page;ui.force=1;ui.menu=0;vis_on=0;lf_advanced=0;ui.layer=LY_PLAY;ly_lock=LY_PLAY;kb_grid=0;}
 UI_SMALL static void lf_name(uint32_t id,char *b)
 {
@@ -29,7 +29,7 @@ UI_SMALL static int lf_ui_input(uint32_t pressed)
         fm1_irq_on();
     }
     if(pressed&(1u<<panel.btn[B_SAVE])) {
-        if(lf_running)ui_message("stop to save");else project_save(0);
+        if(lf_running)ui_message("stop to save");else lf_save_scene();
     }
     if((s=panel_enc(EN_SELECT))) {
         lf_selected=(uint8_t)clamp((int32_t)lf_selected+s,0,3);lf_open(LF_HOME);

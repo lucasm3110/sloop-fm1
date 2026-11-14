@@ -767,6 +767,18 @@ UI_SMALL static void autosave_tick(void)                /* main loop */
 #endif
 }
 
+#if LUCAS_LOOPS_ONLY
+UI_SMALL static void lf_save_scene(void)
+{
+    if(!audio_quiet()) {ui_message("wait for fade");return;}
+    proj_capture(&autosave_buf);
+#if FELUCCA_FLASH
+    if(!flash_ok || st_save(OBJ_AUTOSAVE,&autosave_buf,sizeof autosave_buf)) {ui_message("save error");return;}
+#endif
+    autosave_hash=autosave_buf.sum;autosave_ms=fm1_ms;ui_message("saved");
+}
+#endif
+
 static uint8_t drch_seed;                           /* a settings object as 2.5 wrote it: the drum channel was the
                                                      * project's then (autosave_resume takes it from a 2.5 autosave) */
 UI_SMALL static void autosave_resume(void)              /* power-on: the project as it was left (felucca_init) */

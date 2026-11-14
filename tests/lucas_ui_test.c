@@ -7,7 +7,7 @@ static uint32_t host_slots[4u*0x14000u/4u];
 #include "ui_pages_test.c"
 #define PROJ_HOST 1
 #include "../firmware/src/project.c"
-static uint32_t lf_dirty(void){return 1;}
+static void lf_save_scene(void){saves++;ui_message("saved");}
 static void turn(unsigned role,int delta){encs[panel.enc[role]]=delta;lf_ui_input(0);}
 static int64_t render(unsigned frames){int64_t energy=0;int32_t b[2*CTL];for(unsigned f=0;f<frames;f+=CTL){mix_block(b,CTL);for(unsigned i=0;i<2*CTL;i++)energy+=abs(b[i]);}return energy;}
 int main(int argc,char **argv){
@@ -30,6 +30,8 @@ int main(int argc,char **argv){
     tap(B_REC);tap(B_SEQ);tap(B_LFO);tap(B_FX);assert(lf_page==LF_HOME && !song.rec);
     tap(B_PLAY);assert(!lf_running);render(FS);assert(render(4096)<16384);
     for(unsigned k=0;k<4;k++)assert(!lf_layers[k].active);
+    /* A last-moment replacement waits a full bar for its fade, and STOP keeps the choice. */
+    lf_defaults();lf_scene_play();lf_position=LF_BAR_SAMPLES-10;lf_scene_choose(0,2);render(64);assert(lf[0]==0 && lf_pending[0]==2);lf_scene_stop();assert(lf[0]==2 && lf_pending[0]==255);render(4096);tap(B_SAVE);assert(saves);
     lf_defaults();project_t p;proj_capture(&p);assert(proj_ok(&p));lf[0]=2;lf[8]=15;proj_apply(&p,1);assert(lf[0]==0 && lf[8]==1);
     pt_set(&p.t[3],LF_STORE[0],0x4C31);lf[0]=99;lf_project_get(&p);assert(lf[0]==0 && lf[1]==3);
     puts("PASS: four resident loop lanes; browse/cancel/commit; bar-boundary replacement; fixed knob levels; mute; stop; no synth/drum notes; project roundtrip and legacy migration");
