@@ -7,10 +7,10 @@ if [[ ! -x "$runner" ]]; then
   exit 1
 fi
 mkdir -p private
-package="dist/lucas-fm-0.3.fwsc"
-state="private/public-0.3-session.bin"
-if [[ -f "private/lucas-fm-0.3-personal.fwsc" ]]; then
-  package="private/lucas-fm-0.3-personal.fwsc"
-  state="private/personal-0.3-session.bin"
+package="dist/lucas-fm-0.4.fwsc"
+state="private/public-0.4-session.bin"
+if [[ -f "private/lucas-fm-0.4-personal.fwsc" ]]; then
+  package="private/lucas-fm-0.4-personal.fwsc"
+  state="private/personal-0.4-session.bin"
 fi
 exec "$runner" --fwsc "$package" --flash "$state" --midi none --mhz 240

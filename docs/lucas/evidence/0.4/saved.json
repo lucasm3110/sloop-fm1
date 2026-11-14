@@ -1,0 +1,53 @@
+{
+  "data_bss_bytes": 46648,
+  "data_bss_limit": 98304,
+  "pool_bytes": 89112,
+  "pool_limit": 344064,
+  "lowram_bytes": 4352,
+  "app_bytes": 480148,
+  "audio": {
+    "magic": 1145194289,
+    "halves": 2324,
+    "max_us": 833,
+    "nested": 15620,
+    "in_audio": 0,
+    "late": 0,
+    "timer_irqs": 134758,
+    "ui_frames": 451,
+    "last_us": 331,
+    "cpu_q8": 14,
+    "boots": 1,
+    "stage": 2,
+    "page": 37,
+    "home": 0,
+    "prev_stage": 0,
+    "prev_page": 0,
+    "prev_home": 0,
+    "prev_rst": 0,
+    "prev_frames": 0,
+    "last_cpu_percent": 5.47,
+    "buffer_deadline_us": 5804,
+    "shed_count": 0,
+    "fx_guard": 0,
+    "pitched_voices": [
+      0,
+      0,
+      0
+    ]
+  },
+  "script": "2200:PLAY,2380:PLAY^,3000:e0:+1,3400:EDIT,3580:EDIT^,4000:e0:+1,4400:EDIT,4580:EDIT^,5000:e0:+1,5400:EDIT,5580:EDIT^,6000:e0:-3,6600:e6:+1,7000:EDIT,7180:EDIT^,11000:PLAY,11180:PLAY^,12000:SAVE,12180:SAVE^",
+  "mhz": 240,
+  "sha256": "0457d66669c46c745f1aa6cffbe647cc669ade513b0fa7832c48dda513a30083",
+  "scene": [
+    1,
+    3,
+    5,
+    8,
+    100,
+    90,
+    90,
+    75,
+    15
+  ],
+  "peak": 3484
+}

@@ -1,18 +1,16 @@
-# Lucas FM — M-VAVE FM-1 firmware fork
+# Lucas Loops — four layers for the FM-1
 
-Lucas FM development is on **codex/lucas-fm**. This is a separate project from TeleNeuMu and Geara.
+**Pad. Bass. Melody. Rhythm.** Ten finished loops, two simple screens and four permanent level knobs. Ivory colors and a new rounded interface, built on SLOOP / Felucca.
 
-- [Complete 0.3 download](dist/Lucas-FM-0.3.zip)
-- [Compiled custom firmware](dist/lucas-fm-0.3.fwsc) · [source commit](dist/source-commit.txt) · [SHA-256](dist/SHA256SUMS)
-- [Controls, loops, effects and saving](docs/lucas/GUIDE.md)
-- [Build and emulator instructions](docs/lucas/DEVELOPMENT.md)
-- [0.3 redesign, controls and validation](docs/lucas/0.3.md)
-- [Actual firmware screenshots](docs/lucas/screenshots/0.3/overview.png)
-- [Ten-sound CC0 starter collection](assets/loops-cc0/park-in-d.lucaspack)
+- Double-click **Open Lucas Loops.command** to try the actual firmware in your browser.
+- [0.4 download](dist/Lucas-FM-0.4.zip) · [play-ready firmware](dist/lucas-fm-0.4.fwsc)
+- [Simple controls](docs/lucas/GUIDE.md) · [Build instructions](docs/lucas/DEVELOPMENT.md)
+- [Validation](docs/lucas/0.4.md) · [Screenshots](docs/lucas/screenshots/0.4/overview.png)
+- [Source identity](dist/source-commit.txt) · [Checksums](dist/SHA256SUMS)
 
-Validated in the native emulator; **physical hardware has not been flashed or tested**. The play-ready package boots with ten imported sounds and an editable drum beat. Four imported layers can play at once. Key/tempo variants are prepared offline. Full-load timing requires the device's nominal 240 MHz; the requested 100 MHz emulator stress case overloads. Personal Desktop audio stays in the ignored `private/` folder.
+All loops are D major / 72 BPM. The fourth layer is finished rhythm loops. Physical hardware has not been flashed or tested. Personal samples remain local. This project is separate from TeleNeuMu; development is on `codex/lucas-fm`.
 
-The upstream README and its credits follow as historical reference. Its control map describes SLOOP; use the Lucas guide above for this firmware.
+The upstream README below is historical reference; its controls and features describe SLOOP, not Lucas Loops.
 
 ---
 

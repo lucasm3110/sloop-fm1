@@ -1,0 +1,7 @@
+font: 96 characters, 153600 pixels compared, 0 different
+font: 20000 random strings drawn on and off random canvases ok
+end: everything let go and stopped: all voices free after 2.0 s (at most 30)
+fuzz: 40000 frames (10.7 min), peak 17994, tail 0, visualiser styles seen 12/12, chords 5523, strum changes 806
+fuzz: audio playing in 58 % of blocks, sounding in 79 %; up to 11 strummed notes waiting at once; visualiser on 10 % of frames, menu 9 %
+fuzz: host time per audio block (887370 blocks): mean 3.08 us, 99.9 % under 15 us, 99.99 % under 38 us
+stress: font, fuzz with every 2.4 addition, clean stop PASS

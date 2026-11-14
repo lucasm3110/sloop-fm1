@@ -1,0 +1,8 @@
+font: every character 32..255: the Terminus Bold pixels of its capital (ter-u16b.bdf) ok
+font: lower case shows as capitals, in the same place                        ok
+font: FONT_S: every glyph, 4 colours, 6 places (clipped)                     ok
+font: FONT_L (2x): every glyph, 4 colours, 6 places (clipped): S's bitmaps at 2x ok
+font: advance and bitmap widths unchanged (the layout)                       ok
+font: the 4-bit format (anti-aliased fonts) still draws the same pixels      ok
+font: the Terminus bitmaps at 1 bit a pixel: 5376 bytes (21504 at 4 bits)    ok
+font test passed

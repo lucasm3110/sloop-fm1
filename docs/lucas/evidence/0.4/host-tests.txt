@@ -1,0 +1,8 @@
+PASS: four resident loop lanes; browse/cancel/commit; bar-boundary replacement; fixed knob levels; mute; stop; no synth/drum notes; project roundtrip and legacy migration
+PASS: both screens, every role and sound stay within 240x240
+.......
+----------------------------------------------------------------------
+Ran 7 tests in 0.360s
+
+OK
+PASS: browser pack creation, ten entries, audible encoding, Python compatibility, corruption and root validation

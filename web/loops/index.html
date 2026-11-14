@@ -1,0 +1,12 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>lucas — four loops</title>
+<link rel="stylesheet" href="style.css"><body>
+<header><span class="wordmark">lucas<span class="dot">.</span></span><span class="edition">four layers. one little world.</span></header>
+<main class="instrument"><section class="screen-area"><canvas id="lcd" width="240" height="240" aria-label="Lucas instrument screen"></canvas><button id="start">Start listening <span>↗</span></button></section>
+<section class="controls" aria-label="Instrument controls"><div class="transport"><button id="play" disabled>▶ Play</button><button id="home" disabled>Home</button><button id="save" disabled>Save</button></div>
+<div class="layer-controls" id="layers"></div>
+<div class="browse"><span>PRESETS</span><button id="previous" aria-label="Previous loop" disabled>−</button><button id="next" aria-label="Next loop" disabled>+</button><button id="edit" disabled>Layer on / off</button></div>
+<p class="hint">Select a layer. Browse a loop. Bring it in.</p>
+<div class="master"><label for="master">MASTER</label><input id="master" type="range" min="0" max="1023" value="640" aria-label="Master volume" disabled></div>
+</section></main>
+<footer><p id="status" role="status">Your four-loop instrument is ready.</p><p class="keys">Space: play · ← →: layer · ↑ ↓: sounds · Enter: load / mute · Esc: home</p><details><summary>About this instrument</summary><p>Lucas Loops 0.4 runs the real FM-1 firmware in your browser at 240 MHz. Ten loops in D major at 72 BPM. Save while stopped to keep your setup here. No physical device is connected.</p><p>Emulator by <a href="https://github.com/joakimeriksson/fm1-emu">fm1-emu</a> (MIT). Firmware based on <a href="https://github.com/lucasm3110/sloop-fm1/tree/codex/lucas-fm">SLOOP / Felucca</a> (GPL-3.0). Nunito font (SIL OFL).</p></details></footer>
+<script type="module" src="app.js"></script></body></html>

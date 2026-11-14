@@ -1,0 +1,6 @@
+Final source: 5168e3fca7998233b5b2dc925e007a0ab97e5cec
+CI: https://github.com/lucasm3110/sloop-fm1/actions/runs/43608697443
+PASS: application, update-only and preloaded public packages are byte-for-byte identical to the packages used by the strict native checks.
+PASS: final-source Lucas integration tests in Linux CI.
+Font, full normal stress and sanitizer stress: passed locally after the compatibility fix.
+Full retained upstream follow-up CI still in progress at delivery; known static-check failures are documented in ../../0.4.md.

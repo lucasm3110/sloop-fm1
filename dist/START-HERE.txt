@@ -1,22 +1,5 @@
-Lucas FM 0.3 for M-VAVE FM-1
+Lucas Loops 0.4
 
-Open lucas-fm-0.3.fwsc with Open .fwsc in https://joakimeriksson.github.io/fm1-emu/ and choose 240 MHz. Ten public imports, factory instruments/kits and an editable starter beat are included. Press PLAY for the drum machine.
-
-SELECT selects the part. PRESETS browses sounds. ALGORITHM chooses the engine. On Home, the four knobs are the four part levels. EDIT opens Sound and then its engine controls. SCL opens key, scale, tempo and chord/piano playing. ENV, LFO and ARP open those named functions. FX: ALGORITHM chooses processor, PRESETS loads settings, EDIT bypasses/restores. HOME always returns.
-
-For loops: HOME, SELECT past Drums to LOOPS, EDIT. SELECT a clip, EDIT to play/stop. Four knobs mix four visible clips; PRESETS changes banks. ALGORITHM sets prepared-key/BPM matching. This is not real-time pitch shifting or stretching.
-
-On the development Mac, Launch Lucas FM.command uses the local personal 0.3 package and kit when available. Personal audio is excluded from this public archive.
-
-Native emulator: fm1-live --fwsc lucas-fm-0.3.fwsc --midi none --mhz 240
-
-lucas-fm-0.3-update.fwsc is firmware-only. Physical updates preserve samples; transfer the collection separately with the editor. No physical device has been flashed or tested.
-
-GUIDE.md is the full control map. 0.3.md records validation and limits. DEVELOPMENT.md explains builds. source-commit.txt and SHA256SUMS identify the firmware. Earlier release reports are historical.
-
-Limits: four simultaneous imports, eight shared pitched voices, offline pitch/tempo preparation. Heavy engines can visibly pause shared effects or shed voices. Full 100 MHz workloads overload. Known static instruction-budget failures remain documented.
-
-Complete corresponding source and licenses:
-https://github.com/lucasm3110/sloop-fm1/tree/0358b64dc0cb663632e6f008532ea14e0e1fd995
-Documentation and tools:
-https://github.com/lucasm3110/sloop-fm1/tree/codex/lucas-fm
+Read GUIDE.md. Four layers; ten finished loops at 72 BPM / D major.
+Browser: extract browser.zip, serve it with python3 -m http.server 8774, open http://localhost:8774 and click Start listening.
+Firmware includes the public collection for the emulator. Update-only package does not install samples. Physical FM-1 remains untested.
