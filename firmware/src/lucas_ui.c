@@ -2,7 +2,7 @@
 /* The printed controls are the contract: SELECT focus, PRESETS sounds, ALGORITHM synthesis. */
 enum { LF_HOME, LF_PLAY, LF_SOUND, LF_SEQUENCE, LF_LOOPS, LF_MIX, LF_EFFECTS, LF_SAVE, LF_ENV, LF_LFO, LF_ARP, LF_TONE, LF_ADV=255 };
 static uint8_t lf_page,lf_effect=1,lf_fxpage,lf_pick,lf_save_action,lf_confirm,lf_home_loops,lf_tonepage;
-static uint8_t lf_fx_saved[7],lf_fx_patch;
+static uint8_t lf_fx_saved[7],lf_fx_patch=255;
 static uint32_t lf_confirm_ms;
 static const char *const LF_PAGE[]={"HOME","SCALE / PLAY","SOUND","SEQUENCE","LOOPS","MIX","EFFECTS","SAVE","ENVELOPE","LFO","ARPEGGIATOR","SOUND EDIT"};
 static const char *const LF_ROLE[]={"PAD","BASS","MELODY","DRUMS"};
@@ -51,7 +51,7 @@ UI_SMALL static void lf_fx_knob(uint32_t k,int32_t s)
     static const uint8_t env[]={P_ATK,P_DEC,P_SUS,P_REL};
     static const uint8_t eq[]={LF_LOW,LF_BASS,LF_MID,LF_TREBLE};
     static const uint8_t grain[]={LF_GMIX,LF_GSIZE,LF_GDELAY,LF_SCATTER,LF_DENSITY,LF_RANDOM,LF_FEEDBACK,LF_GWIDTH};
-    lf_cpu_guard=0;
+    lf_cpu_guard=0;lf_fx_patch=255;
     switch(lf_effect) {
     case 0: lf_pedit(env[k],s); break;
     case 1: if(!lf_fxpage) {lf_edit(eq[k],s);lf[LF_EQ]=1;} else if(k==0) {lf_edit(LF_HIGH,s);lf[LF_EQ]=1;} else if(k==3) lf[LF_EQ]=(uint8_t)(s>0); break;
@@ -89,9 +89,10 @@ UI_SMALL static void lf_fx_preset(int32_t s)
         {{30,90,100,0},{80,70,82,0},{120,48,68,0}},
         {{50,2,32,90},{70,6,65,80},{90,0,90,50}},
         {{45,35,90,0},{70,85,72,0},{95,120,45,0}}};
-    uint32_t i=lf_effect<3?lf_effect-1:lf_effect-3,k;
-    lf_fx_patch=(uint8_t)clamp(lf_fx_patch+s,0,2);lf_fxpage=0;
-    for(k=0;k<4;k++) {lf_fx_knob(k,-255);lf_fx_knob(k,patch[i][lf_fx_patch][k]);}
+    uint32_t i=lf_effect<3?lf_effect-1:lf_effect-3,k,p=(uint32_t)clamp((lf_fx_patch<3?lf_fx_patch:(s>0?-1:3))+s,0,2);
+    lf_fxpage=0;
+    for(k=0;k<4;k++) {lf_fx_knob(k,-255);lf_fx_knob(k,patch[i][p][k]);}
+    lf_fx_patch=(uint8_t)p;
     if(lf_effect==1)lf[LF_HIGH]=127;
 }
 UI_SMALL static int lf_ui_input(uint32_t pressed)
@@ -151,7 +152,7 @@ UI_SMALL static int lf_ui_input(uint32_t pressed)
     }
     if((s=panel_enc(EN_ALGO))) {
         if(is_drum(TSEL) && lf_voice_page()) {}
-        else if(lf_page==LF_EFFECTS) {lf_effect=(uint8_t)clamp(lf_effect+s,1,6);lf_fxpage=0;}
+        else if(lf_page==LF_EFFECTS) {lf_effect=(uint8_t)clamp(lf_effect+s,1,6);lf_fxpage=0;lf_fx_patch=255;}
         else if(lf_page==LF_LFO) lf_pedit(P_LWAVE,s);
         else if(lf_page==LF_ARP) {lf_release(1u<<song.sel);lf_pedit(P_AMODE,s);}
         else if(lf_page==LF_LOOPS) {
@@ -264,8 +265,8 @@ UI_SMALL static void lf_values(const char **lab,char val[4][16])
     } else if(lf_page==LF_SAVE) {
         lab[0]="SLOT";lab[1]=lab[2]=lab[3]="";fmt_int(val[0],song.g[G_SLOT]);val[1][0]=val[2][0]=val[3][0]=0;
     } else {
-        fmt_int(val[0],is_drum(TSEL)?song.g[G_DRLVL]:TSEL->p[P_LEVEL]);fmt_int(val[1],TSEL->p[P_TFLT]);
-        fmt_int(val[2],is_drum(TSEL)?song.g[G_DRREV]:TSEL->p[P_REV]);str_cpy(val[3],modes[lf_mode()],16);
+        fmt_int(val[0],(is_drum(TSEL)?song.g[G_DRLVL]:TSEL->p[P_LEVEL])*100/127);fmt_int(val[1],TSEL->p[P_TFLT]);
+        fmt_int(val[2],(is_drum(TSEL)?song.g[G_DRREV]:TSEL->p[P_REV])*100/127);str_cpy(val[3],modes[lf_mode()],16);
         if(lf_page==LF_MIX) {lab[1]="PAN";lab[2]="MUTE";lab[3]="SOLO";fmt_int(val[1],TSEL->p[P_PAN]);str_cpy(val[2],TSEL->p[P_MUTE]?"ON":"OFF",16);str_cpy(val[3],song.solo&(1u<<song.sel)?"ON":"OFF",16);}
     }
     if(is_drum(TSEL) && lf_voice_page())for(k=0;k<4;k++){lab[k]="";val[k][0]=0;}
@@ -406,11 +407,15 @@ UI_SMALL static int lf_ui_draw(void)
             if(row==1) cv_text(8,7,text_w(&FONT_L,LF_EFFECT[lf_effect])<224?&FONT_L:&FONT_S,LF_EFFECT[lf_effect],LF_COLOR[song.sel]);
             if(row==2) {lf_text(8,0,lf_effect==0?"SELECTED TRACK":lf_effect>=5?"SEND / SHARED BUS":"SHARED MASTER",LF_DIM);
                 lf_text(8,20,lf_fx_amount()?"ACTIVE":"BYPASSED",lf_fx_amount()?LF_COLOR[1]:LF_DIM);}
-            if(row==3 && lf_effect==1) {
-                int x[5]={8,58,116,174,230},y[5]={10+lf[LF_LOW]/5,24-((int)lf[LF_BASS]-64)/4,24-((int)lf[LF_MID]-64)/4,24-((int)lf[LF_TREBLE]-64)/4,10+(127-lf[LF_HIGH])/5};
-                cv_line(8,24,230,24,LF_SURFACE);for(k=0;k<4;k++)cv_line(x[k],y[k],x[k+1],y[k+1],LF_COLOR[song.sel]);
+            if(row==3 && lf_effect!=3 && lf_effect!=4) {
+                static const char *const patch[4][3]={{"FLAT","WARM","AIR"},{"SOFT","CRUNCH","CRUSH"},{"TIGHT","DOTTED","ECHO"},{"ROOM","HALL","CLOUD"}};
+                lf_text(8,0,"PRE",LF_DIM);lf_text(40,0,lf_fx_patch<3?patch[lf_effect<3?lf_effect-1:lf_effect-3][lf_fx_patch]:"CUSTOM",LF_TEXT);
             }
-            if(row==3 && lf_effect!=1 && lf_effect!=3 && lf_effect!=4) {cv_rect(8,14,224,6,LF_SURFACE);cv_rect(8,14,lf_fx_amount()*224/127,6,LF_COLOR[song.sel]);}
+            if(row==3 && lf_effect==1) {
+                int x[5]={8,58,116,174,230},y[5]={20+lf[LF_LOW]/10,27-((int)lf[LF_BASS]-64)/8,27-((int)lf[LF_MID]-64)/8,27-((int)lf[LF_TREBLE]-64)/8,20+(127-lf[LF_HIGH])/10};
+                cv_line(8,27,230,27,LF_SURFACE);for(k=0;k<4;k++)cv_line(x[k],y[k],x[k+1],y[k+1],LF_COLOR[song.sel]);
+            }
+            if(row==3 && lf_effect!=1 && lf_effect!=3 && lf_effect!=4) {cv_rect(8,28,224,6,LF_SURFACE);cv_rect(8,28,lf_fx_amount()*224/127,6,LF_COLOR[song.sel]);}
             if(row==3 && lf_effect==3) {lf_text(8,0,"PRESETS",LF_DIM);static const char *const mod[]={"CHORUS","VIBRATO","TREMOLO","PHASER"};lf_text(8,19,mod[lf[LF_MOD]%4],LF_TEXT);}
             if(row==3 && lf_effect==4) {lf_text(8,0,"PRESETS: PITCH",LF_DIM);static const char *const pitch[]={"OCTAVES","IN KEY: TONAL LOOP","FREE"};lf_text(8,19,pitch[lf[LF_PITCH]%3],LF_TEXT);}
             if(row==4) {lf_text(8,0,lf_effect?"EDIT: ON / OFF":"ALGO: EFFECT",LF_DIM);
